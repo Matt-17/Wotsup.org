@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# If URL ends with a trailing slash but isn't a real directory, redirect to the no-slash URL (canonicalize)
+RewriteCond %{REQUEST_URI} ^(.+)/$
+RewriteCond %{DOCUMENT_ROOT}%1 -d [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteCond %{REQUEST_URI} ^(.+)/$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ %1 [R=301,L]
+
+# If the request is not an existing file or directory, but adding .html yields a real file, internally rewrite to that .html file (keeps .html hidden)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*?)/?$ $1.html [L]
+
+# Custom 404 page - point to the generated file
+ErrorDocument 404 /404.html

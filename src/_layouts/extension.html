@@ -1,0 +1,82 @@
+---
+layout: default
+---
+<article class="extension-detail">
+    <header class="page-header">
+        <h1>{{ page.extension | upcase }} Extension</h1>
+        {% if page.aliases %}
+        <p class="aliases">Also used as:
+            {% for a in page.aliases %}<code>.{{ a }}</code>{% unless forloop.last %}, {% endunless %}{% endfor %}
+        </p>
+        {% endif %}
+    </header>
+
+    {% assign entries = page.extensions | default: page.descriptions %}
+    {% if entries and entries.size > 0 %}
+    <section class="extension-entries">
+        <h2>Extensions</h2>
+        <table class="ext-meanings-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Resources</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in entries %}
+                <tr id="entry-{{ forloop.index }}">
+                    <td>{{ forloop.index }}</td>
+                    <td>{{ m.name | default: m.title | default: m.author | default: '—' }}</td>
+                    <td>{{ m.category | default: 'misc' }}</td>
+                    <td>{{ m.description | default: m.text | default: m.summary | default: '—' }}</td>
+                    <td>
+                        {% if m.resources %}
+                        {{ m.resources | size }} item{% if m.resources.size != 1 %}s{% endif %}
+                        {% elsif m.download_url or m.file or m.link or m.url or m.badlink %}
+                        1 item
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
+    <section class="extension-content">
+        <h2>Details</h2>
+        <div class="ext-toc" id="ext-toc"></div>
+        <div class="ext-body">
+            {{ content }}
+        </div>
+    </section>
+</article>
+
+<script>
+    // Build a simple TOC from h2/h3 inside .ext-body
+    (function () {
+        const body = document.querySelector('.ext-body');
+        const toc = document.getElementById('ext-toc');
+        if (!body || !toc) return;
+        const heads = body.querySelectorAll('h2, h3');
+        if (!heads.length) { toc.remove(); return; }
+        const list = document.createElement('ul');
+        heads.forEach(h => {
+            if (!h.id) h.id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const li = document.createElement('li');
+            if (h.tagName.toLowerCase() === 'h3') li.style.marginLeft = '1em';
+            const a = document.createElement('a');
+            a.href = '#' + h.id; a.textContent = h.textContent.trim();
+            li.appendChild(a); list.appendChild(li);
+        });
+        const tocTitle = document.createElement('h3');
+        tocTitle.textContent = 'On This Page';
+        toc.appendChild(tocTitle);
+        toc.appendChild(list);
+    })();
+</script>

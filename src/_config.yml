@@ -1,0 +1,57 @@
+title: Wotsup.org
+email: contact@wotsup.org
+description: >- 
+  A comprehensive, community-driven resource for file format specifications and 
+  programming documentation. Search hundreds of format specs, data structures, and 
+  implementation guides.
+baseurl: "" 
+url: "https://wotsup.org" 
+github_username: Matt-17/Wotsup
+
+markdown: kramdown
+
+pagination_size: 40
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+navigation:
+  - title: Home
+    url: /
+
+  - title: Extensions
+    url: /extensions/
+
+  - title: FAQ
+    url: /faq
+
+  - title: About
+    dropdown:
+      - title: About
+        url: /about
+      - title: Contributing
+        url: /contributing
+      - title: How To Use
+        url: /how-to
+
+  - title: Contact
+    dropdown:
+      - title: Support Us
+        url: /support/
+      - title: Send Feedback
+        url: /feedback/
+      - title: Make a Complaint
+        url: /complaint/
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .sass-cache/
+  - .jekyll-cache/
+  - .jekyll-metadata

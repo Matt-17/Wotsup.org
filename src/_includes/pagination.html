@@ -1,0 +1,141 @@
+{% comment %}
+Reusable pagination include
+Parameters:
+- base_url: base URL for page 1 (must include leading and trailing slash, e.g. "/extensions/")
+- current: current page number (integer)
+- total_pages: total number of pages (integer)
+- id_suffix: optional suffix to make the select id unique
+{% endcomment %}
+
+{% assign current = include.current | plus: 0 %}
+{% assign total_pages = include.total_pages | plus: 0 %}
+{% assign base_url = include.base_url %}
+{% assign id_suffix = include.id_suffix | default: '' %}
+{% assign per_page = include.per_page | default: 25 %}
+{% assign total_items = include.total_items | plus: 0 %}
+
+{% comment %} Compute shown range (start..last) for current page {% endcomment %}
+{% assign start = current | minus: 1 | times: per_page | plus: 1 %}
+{% assign last = current | times: per_page %}
+{% if last > total_items %}
+{% assign last = total_items %}
+{% endif %}
+
+{% if total_pages > 1 %}
+{% assign __rendered_pagination = 'true' %}
+<nav class="pagination" aria-label="Pagination">
+
+    <ul>
+        {% if current > 1 %}
+        {% assign prev = current | minus: 1 %}
+        {% if prev == 1 %}
+        <li class="prev"><a href="{{ base_url }}">&laquo; Prev</a></li>
+        {% else %}
+        <li class="prev"><a href="{{ base_url }}page{{ prev }}/">&laquo; Prev</a></li>
+        {% endif %}
+        {% endif %}
+
+        {%- comment -%} Determine visible window: show up to 6 page numbers, but be smart around edges {%- endcomment
+        -%}
+        {% assign max_visible = 6 %}
+        {% assign limit = max_visible | plus: 2 %}
+
+        {% if total_pages <= limit %} {% assign start=1 %} {% assign end=total_pages %} {% else %} {% assign
+            tail_threshold=total_pages | minus: max_visible %} {% if current <=max_visible %} {% assign start=1 %} {%
+            assign end=max_visible %} {% elsif current> tail_threshold %}
+            {% assign end = total_pages %}
+            {% assign start = total_pages | minus: max_visible | plus: 1 %}
+            {% else %}
+            {% assign half = max_visible | divided_by: 2 %}
+            {% assign start = current | minus: half %}
+            {% if start < 1 %} {% assign start=1 %} {% endif %} {% assign end=start | plus: max_visible | minus: 1 %} {%
+                endif %} {% endif %} {% comment %} Leading first page + ellipsis if needed {% endcomment %} {% if start>
+                1 %}
+                <li><a href="{{ base_url }}">1</a></li>
+                {% if start > 2 %}
+                <li class="ellipsis">…</li>
+                {% endif %}
+                {% endif %}
+
+                {% for i in (start..end) %}
+                {% if i == current %}
+                <li class="current">{{ i }}</li>
+                {% else %}
+                {% if i == 1 %}
+                <li><a href="{{ base_url }}">1</a></li>
+                {% else %}
+                <li><a href="{{ base_url }}page{{ i }}/">{{ i }}</a></li>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+
+                {% if end < total_pages %} {% assign second_last=total_pages | minus: 1 %} {% if end < second_last %}
+                    <li class="ellipsis">…</li>
+                    {% endif %}
+                    <li><a href="{{ base_url }}page{{ total_pages }}/">{{ total_pages }}</a></li>
+                    {% endif %}
+
+                    {% if current < total_pages %} {% assign next=current | plus: 1 %} <li class="next"><a
+                            href="{{ base_url }}page{{ next }}/">Next &raquo;</a></li>
+                        {% endif %}
+
+    </ul>
+
+    <div class="pagination-jump">
+        <div class="pagination-jump-inner">
+
+
+            <div class="pagination-controls" aria-hidden="false">
+                <label for="page-jump-{{ id_suffix }}" class="jump-label">
+                    <span class="pagination-note">Showing {{ start }}-{{ last }} of {{ total_items }}</span>
+                    <span class="pagination-note"> • </span>
+                    Jump to page
+                </label>
+                <select id="page-jump-{{ id_suffix }}" onchange="if(this.value) window.location.href=this.value">
+                    {% for i in (1..total_pages) %}
+                    {% if i == 1 %}
+                    <option value="{{ base_url }}" {% if i==current %}selected{% endif %}>1</option>
+                    {% else %}
+                    <option value="{{ base_url }}page{{ i }}/" {% if i==current %}selected{% endif %}>{{ i }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endif %}
+{% if paginator and paginator.total_pages and paginator.total_pages > 1 and __rendered_pagination != 'true' %}
+{% comment %} Extract base path from page permalink or paginator first_page_path {% endcomment %}
+{% assign base_path = page.permalink | default: paginator.first_page_path | default: "/extensions/" %}
+{% assign base_path = base_path | remove: "index.html" %}
+
+<nav class="pagination" aria-label="Pagination">
+    <ul class="pagination-list">
+        {% if paginator.previous_page %}
+        <li class="prev">
+            {% if paginator.previous_page == 1 %}
+            <a href="{{ base_path }}" rel="prev">&larr; Prev</a>
+            {% else %}
+            <a href="{{ base_path }}page{{ paginator.previous_page }}/" rel="prev">&larr; Prev</a>
+            {% endif %}
+        </li>
+        {% endif %}
+
+        {% for i in (1..paginator.total_pages) %}
+        <li class="page{% if i == paginator.page %} current{% endif %}">
+            {% if i == 1 %}
+            <a href="{{ base_path }}">1</a>
+            {% else %}
+            <a href="{{ base_path }}page{{ i }}/">{{ i }}</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+
+        {% if paginator.next_page %}
+        <li class="next"><a href="{{ base_path }}page{{ paginator.next_page }}/" rel="next">Next &rarr;</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

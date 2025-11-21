@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" class="wotsup-theme">
+{%- include head.html -%}
+
+<body>
+    <div class="site-shell">
+        {%- include header.html -%}
+        <main class="page-content" aria-label="Content">
+            <div class="wrapper layout-grid">
+                <aside class="site-sidebar" aria-label="Site navigation">
+                    {%- include sidebar.html -%}
+                </aside>
+
+                <!-- Panel between sidebar and main: spans the main column -->
+                <div class="panel-letters" role="navigation" aria-label="Extensions by letter">
+                    <nav class="extensions-nav">
+                        {% assign letters = site.data.letters.letters | sort %}
+
+                        {%- comment -%}
+                        Determine the current letter for highlighting. If the page provides
+                        `page.letter`, use that. Otherwise attempt to extract from the URL
+                        (useful for pages under `/extensions/<letter>/`).
+                            {%- endcomment -%}
+                            {% assign current_letter = "" %}
+                            {% if page.letter %}
+                            {% assign current_letter = page.letter | downcase %}
+                            {% else %}
+                            {% assign url_parts = page.url | split: '/' %}
+                            {% if url_parts.size > 2 and url_parts[1] == 'extensions' %}
+                            {% assign maybe = url_parts[2] %}
+                            {% assign current_letter = maybe | downcase %}
+                            {% endif %}
+                            {% endif %}
+
+                            {% if letters %}
+                            <ul>
+                                {% for letter in letters %}
+                                {% assign lslug = letter | downcase %}
+                                <li>
+                                    <a href="/extensions/{{ lslug }}/"
+                                        class="{% if lslug == current_letter %}active{% endif %}" {% if
+                                        lslug==current_letter %}aria-current="true" {% endif %}>{{ letter | upcase
+                                        }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                    </nav>
+                </div>
+
+                <section class="site-main">
+                    <div class="panel-content">
+                        {{ content }}
+                    </div>
+                </section>
+            </div>
+        </main>
+        {%- include footer.html -%}
+    </div>
+</body>
+
+</html>

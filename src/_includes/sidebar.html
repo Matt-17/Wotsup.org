@@ -1,0 +1,29 @@
+<nav class="sidebar-nav">
+    <div class="sidebar-extensions">
+        <div class="extensions-filters" role="navigation" aria-label="Extensions filter">
+
+            <div class="filters-category">
+                <ul>
+                    {% assign ext_url = '/extensions/' %}
+                    <li class="mb">
+                        <a href="{{ ext_url }}" {% if page.url contains ext_url %}class="active" aria-current="true" {%
+                            endif %}>
+                            All formats
+                        </a>
+                    </li>
+                    {% for cat in site.data.categories.categories | sort: 'name' %}
+                    {% assign link_url = '/categories/' | append: cat.slug | append: '/' %}
+                    <li>
+                        <a href="{{ link_url }}" {% if page.url==link_url or page.url contains link_url %}class="active"
+                            aria-current="true" {% endif %}>
+                            {% include icons/category-{{ cat.slug }}.svg %}
+                            <span class="sidebar-label">{{ cat.name }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</nav>

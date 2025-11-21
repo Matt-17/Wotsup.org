@@ -1,0 +1,105 @@
+{% comment %}
+Reusable table for displaying extensions with merged extension column.
+
+Parameters (assign before including):
+- items: Array of extension items to display
+- no_items_message: (optional) Message when items is empty
+{% endcomment %}
+
+{% if items and items.size > 0 %}
+{% assign sorted = items | sort: 'ext' %}
+{% unless sorted %}
+{% assign sorted = '' | split: '' %}
+{% endunless %}
+{% assign current_letter = '' %}
+{% assign prev_ext = '' %}
+{% assign table_started = false %}
+
+{% for item in sorted %}
+
+
+{% unless table_started %}
+{% assign table_started = true %}
+<table class="extensions-table">
+    <thead>
+        <tr>
+            <th class="extension">Extension</th>
+            <th class="description">Description</th>
+            <th class="author">Author</th>
+            <th class="spec">File / Link</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% endunless %}
+
+        <tr>
+            {% assign ext = item.ext %}
+            {% if ext and sorted %}
+            {% assign group = sorted | where: "ext", ext %}
+            {% else %}
+            {% assign group = '' | split: '' %}
+            {% endif %}
+            {% assign group_size = group | size %}
+            {% if item.ext != prev_ext %}
+            {% assign letter_path = item.letter | downcase %}
+            <td class="extension" {% if group_size> 1 %}rowspan="{{ group_size }}"{% endif %}>
+                <a class="ext-link"
+                    href="/extensions/{{ letter_path }}/{{ item.slug }}/"><code>{{ item.ext }}</code></a>
+            </td>
+            {% assign prev_ext = item.ext %}
+            {% endif %}
+
+            {% if item.author %}
+            <td class="description">{% if item.unverified %}<span class="unverified" title="Unverified"
+                    aria-hidden="true">⚠</span><span class="sr-only">Unverified</span>{% endif %}{{ item.description }}
+            </td>
+            <td class="author">{{ item.author }}</td>
+            {% else %}
+            <td class="description" colspan="2">{% if
+                item.unverified %}<span class="unverified" title="Unverified" aria-hidden="true">⚠</span><span
+                    class="sr-only">Unverified</span>{% endif %}{{ item.description }}
+            </td>
+            {% endif %}
+
+            <td class="spec align-right">
+                {% if item.deprecated %}<span class="deprecated" title="Deprecated resource"
+                    aria-hidden="true">⚠</span><span class="sr-only">Deprecated resource</span>{% endif %}
+                {% if item.is_alternative %}
+                {% assign alt_slug = item.alternative_to %}
+                {% assign alt_target = items | where: "slug", alt_slug | first %}
+                {% if alt_target %}
+                <a class="action-btn alt" href="/extensions/{{ alt_target.letter | downcase }}/{{ alt_target.slug }}/">
+                    <span class="icon" aria-hidden="true">🔁</span>
+                    <span class="label">{{ alt_target.ext }}</span>
+                </a>
+                {% else %}
+                <a class="action-btn alt" href="/extensions/{{ item.letter | downcase }}/{{ alt_slug }}/">
+                    <span class="icon" aria-hidden="true">🔁</span>
+                    <span class="label">.{{ alt_slug }}</span>
+                </a>
+                {% endif %}
+                {% elsif item.file %}
+                <a class="action-btn file" href="{{ item.download_url | default: item.file | relative_url }}" download>
+                    <span class="icon" aria-hidden="true">📄</span>
+                    <span class="label">Download</span>
+                </a>
+                {% elsif item.link %}
+                <a class="action-btn link" href="{{ item.link }}">
+                    <span class="icon" aria-hidden="true">🔗</span>
+                    <span class="label">Link</span>
+                </a>
+                {% else %}
+                <span class="no-action">—</span>
+                {% endif %}
+            </td>
+        </tr>
+
+        {% if forloop.last %}
+    </tbody>
+</table>
+{% assign table_started = false %}
+{% endif %}
+{% endfor %}
+{% elsif no_items_message %}
+<p class="no-extensions">{{ no_items_message }}</p>
+{% endif %}

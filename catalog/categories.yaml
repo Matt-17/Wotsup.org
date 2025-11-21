@@ -1,0 +1,104 @@
+- name: 2d-graphics
+  short: 2D Graphics
+  title: 2D Graphics Files
+  description: Files used for storing and representing two-dimensional images, including raster and vector formats.
+
+- name: 3d-graphics
+  short: 3D Graphics
+  title: 3D Graphics Files
+  description: Files used for storing and representing three-dimensional models and scenes.
+
+- name: cad
+  short: CAD Files
+  title: CAD Files
+  description: Computer-Aided Design (CAD) files used in engineering, architecture, and manufacturing.
+
+- name: data-format
+  short: Data Formats
+  title: Data Files and Formats
+  description: Files used for storing structured data in various formats.
+
+- name: video-animation
+  short: Video Files
+  title: Video and Animation Files
+  description: Files used for storing video content and animations.
+
+- name: archive
+  short: Archive Files
+  title: Archive Files
+  description: Compressed and archived file formats used for bundling multiple files together.
+
+- name: binaries
+  short: Binaries
+  title: Binary Files
+  description: Executable and binary file formats used by operating systems and applications.
+
+- name: spreadsheets
+  short: Spreadsheets
+  title: Spreadsheet Files
+  description: Files used for storing and manipulating tabular data in spreadsheet applications.
+
+- name: databases
+  short: Databases
+  title: Database Files
+  description: Files used for storing and managing databases.
+
+- name: financial
+  short: Financial
+  title: Financial and Stocks Files
+  description: Files related to financial data, accounting, and stock market information.
+
+- name: fonts
+  short: Font Files
+  title: Font Files
+  description: Files used for storing font data for text rendering.
+
+- name: game-files
+  short: Game Files
+  title: Game Files
+  description: Files related to video games, including save files, mods, and game data.
+
+- name: documents
+  short: Documents
+  title: Text Files and Documents
+  description: Files used for storing text documents and formatted text.
+
+- name: internet
+  short: Internet
+  title: Internet Related Files and Formats
+  description: Files and formats commonly used for internet applications and web content.
+
+- name: audio
+  short: Sound and Music
+  title: Sound and Music Files
+  description: Files used for storing audio data, including music and sound effects.
+
+- name: windows
+  short: Windows Files
+  title: Windows Files
+  description: File formats specific to the Microsoft Windows operating system.
+
+- name: gis-formats
+  short: GIS Formats
+  title: GIS Formats
+  description: Files used for Geographic Information Systems (GIS) to store spatial data.
+
+- name: communication-formats
+  short: Communication
+  title: Communication Formats
+  description: Files used for communication purposes, including messaging and email formats.
+
+- name: printer-formats
+  short: Printer
+  title: Printer Formats
+  description: Files used for printing purposes, including print job files and printer-specific formats.
+
+- name: hardware-formats
+  short: Hardware
+  title: Hardware Formats
+  description: Files related to hardware devices and their configurations.
+
+- name: misc
+  short: Miscellaneous
+  title: Miscellaneous Files
+  description: Various file formats that do not fit into other specific categories.

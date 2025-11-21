@@ -1,0 +1,69 @@
+---
+layout: extensions_panel
+title: "Extensions: {{ page.letter | upcase }}"
+---
+<article class="extensions-index">
+  <header class="page-header">
+    <h1>Extensions: {{ page.letter | upcase }}</h1>
+  </header>
+
+  <div class="extensions-main">
+    {% assign all = site.data.catalog_flat %}
+    {% assign letter = page.letter | downcase %}
+
+    {% comment %} Filter items by the catalog folder 'letter' field {% endcomment %}
+    {% assign all_items = '' | split: '' %}
+    {% for item in all %}
+      {% assign matched = false %}
+      {% if item.letters %}
+        {% for l in item.letters %}
+          {% if l | downcase == letter %}
+            {% assign matched = true %}
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {% assign item_letter = item.letter | downcase %}
+        {% if item_letter == letter %}
+          {% assign matched = true %}
+        {% endif %}
+      {% endif %}
+      {% if matched %}
+        {% assign all_items = all_items | push: item %}
+      {% endif %}
+    {% endfor %}
+
+    {% assign per_page = site.pagination_size | default: 25 %}
+    {% assign page_path = page.url | remove_first: '/extensions/' | remove_first: letter | remove_first: '/' | remove:
+    '/' %}
+    {% if page_path contains 'page' %}
+    {% assign page_num = page_path | remove: 'page' | plus: 0 %}
+    {% else %}
+    {% assign page_num = 1 %}
+    {% endif %}
+
+    {% assign offset = page_num | minus: 1 | times: per_page %}
+    {% assign end_index = offset | plus: per_page | minus: 1 %}
+
+    {% assign items = '' | split: '' %}
+    {% for item in all_items %}
+    {% assign item_index = forloop.index | minus: 1 %}
+    {% if item_index >= offset and item_index <= end_index %} {% assign items=items | push: item %} {% endif %} {%
+      endfor %} {% assign no_items_message='No extensions starting with ' | append: page.letter |
+      append: ' have been catalogued yet.' | upcase %} {% include extensions-table.html %} {% comment %} Pagination info
+      {% endcomment %} {% assign total_items=all_items | size %} {% if total_items> per_page %}
+
+      {% comment %} Compute total pages {% endcomment %}
+      {% assign total_pages = total_items | divided_by: per_page %}
+      {% assign remainder = total_items | modulo: per_page %}
+      {% if remainder != 0 %}
+      {% assign total_pages = total_pages | plus: 1 %}
+      {% endif %}
+
+      {% if total_pages > 1 %}
+      {% assign __base = "/extensions/" | append: letter | append: "/" %}
+      {% include pagination.html base_url=__base current=page_num total_pages=total_pages id_suffix=letter
+      per_page=per_page total_items=total_items %}
+      {% endif %}
+      {% endif %}
+  </div>
+</article>

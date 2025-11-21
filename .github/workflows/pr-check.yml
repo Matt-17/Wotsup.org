@@ -1,0 +1,119 @@
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  validate:
+    name: Validate Schema & Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install dotnet-script
+        run: dotnet tool install -g dotnet-script
+
+      - name: YAML Schema Validation
+        run: dotnet script tools/validate_yaml_schema.cs
+
+      - name: Generated Data Integrity Check
+        shell: pwsh
+        run: ./tools/check_generated_integrity.ps1
+
+  generate:
+    name: Generate Data Files
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run data generators
+        shell: pwsh
+        run: ./tools/build.ps1
+
+      - name: Upload generated data
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-data
+          path: |
+            src/_data/*.yml
+            src/extensions/*.md
+            src/categories/*.md
+          retention-days: 1
+
+  build:
+    name: Build Jekyll Site
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: src
+
+      - name: Install Ruby dependencies
+        working-directory: src
+        run: bundle install
+
+      - name: Download generated data
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-data
+          path: src/
+
+      - name: Jekyll Doctor
+        working-directory: src
+        run: bundle exec jekyll doctor
+
+      - name: Build Jekyll site
+        working-directory: src
+        run: bundle exec jekyll build
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-build
+          path: src/_site/
+          retention-days: 1
+
+  audit:
+    name: Security & Dependency Audit
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: src
+
+      - name: Install Ruby dependencies
+        working-directory: src
+        run: bundle install
+
+      - name: Ruby Dependency Audit
+        working-directory: src
+        run: bundle exec bundler-audit check --update
+

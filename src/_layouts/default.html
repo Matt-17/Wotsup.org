@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" class="wotsup-theme">
+{%- include head.html -%}
+
+<body>
+  <div class="site-shell">
+    {%- include header.html -%}
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper layout-grid">
+        <aside class="site-sidebar" aria-label="Site navigation">
+          {%- include sidebar.html -%}
+        </aside>
+        <section class="site-main">
+          {{ content }}
+        </section>
+      </div>
+    </main>
+    {%- include footer.html -%}
+  </div>
+</body>
+
+</html>

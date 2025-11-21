@@ -1,0 +1,14 @@
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.3"
+gem "csv"
+gem "base64"
+gem "bigdecimal"
+gem "mutex_m"
+gem "html-proofer", group: :development
+gem "bundler-audit", require: false
+
+group :jekyll_plugins do
+  gem "jekyll-seo-tag"
+  gem "jekyll-sitemap"
+end
