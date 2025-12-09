@@ -1,5 +1,14 @@
 RewriteEngine On
 
+# ----- Force HTTPS -----
+# Redirect HTTP requests to HTTPS. Also handles proxies/load-balancers
+# that set the X-Forwarded-Proto header.
+<IfModule mod_rewrite.c>
+	RewriteCond %{HTTPS} !=on
+	RewriteCond %{HTTP:X-Forwarded-Proto} !https
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
 # If URL ends with a trailing slash but isn't a real directory, redirect to the no-slash URL (canonicalize)
 RewriteCond %{REQUEST_URI} ^(.+)/$
 RewriteCond %{DOCUMENT_ROOT}%1 -d [OR]
