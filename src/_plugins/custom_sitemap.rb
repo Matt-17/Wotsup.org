@@ -4,6 +4,7 @@
 # unchanged (so server rewrite rules can continue to serve `/about` -> `/about.html`).
 
 require 'rexml/document'
+require 'fileutils'
 
 module Jekyll
   class CustomSitemap < Generator
@@ -56,6 +57,9 @@ module Jekyll
 
       # Write sitemap.xml to destination
       dest_path = File.join(site.dest, 'sitemap.xml')
+      # Ensure destination directory exists (Jekyll may not have created it yet)
+      FileUtils.mkdir_p(File.dirname(dest_path))
+
       File.open(dest_path, 'w') do |f|
         formatter = REXML::Formatters::Pretty.new(2)
         formatter.compact = true
