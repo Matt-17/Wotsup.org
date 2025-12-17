@@ -33,10 +33,26 @@ module Jekyll
       seen = {}
       items.each do |item|
         next if item.data['sitemap'] == false
-        # item.url may end with .html; we want to strip it for sitemap loc
-        loc_path = item.url.to_s.sub(/\.html$/i, '')
-        # Ensure root path becomes '/'
-        loc_path = '/' if loc_path == ''
+        
+        # Build path from directory + basename (without extension)
+        # This avoids the .html suffix entirely
+        dir = item.dir.to_s
+        basename = item.basename.to_s
+        
+        # Remove .html, .md, or other extensions from basename
+        basename_without_ext = basename.sub(/\.[^.]+$/, '')
+        
+        # Construct the clean URL path
+        if basename_without_ext == 'index'
+          # index files become just their directory (or root)
+          loc_path = dir.empty? ? '/' : dir
+          loc_path = '/' if loc_path == ''
+        else
+          # Regular files/pages
+          loc_path = File.join(dir, basename_without_ext).gsub('\\', '/').sub(/^\/$/, '')
+          loc_path = '/' if loc_path == '' || loc_path == '.'
+        end
+        
         next if seen[loc_path]
         seen[loc_path] = true
 
