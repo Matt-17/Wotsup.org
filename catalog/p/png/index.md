@@ -1,7 +1,8 @@
 ---
+overview: ".png is primarily used for Portable Network Graphics images: lossless raster graphics with strong support for web use, transparency, metadata, and preservation."
 extensions:
-  - name: "Portable Network Graphics Specification (Third Edition)"
-    description: "W3C Recommendation, 2025"
+  - name: "Portable Network Graphics (PNG)"
+    description: "Lossless raster image format; current W3C PNG Third Edition Recommendation, 2025"
     categories:
     - 2d-graphics
     author: "W3C PNG Working Group"
@@ -40,7 +41,7 @@ extensions:
     
 ---
 
-## Deep Dive
+## Portable Network Graphics (PNG)
 
 PNG is a lossless raster image format designed for portable network graphics,
 especially on the web. It replaced many GIF use cases by supporting better
@@ -49,7 +50,7 @@ transparency without relying on patented compression. It remains important for
 screenshots, diagrams, icons, transparency-heavy graphics, and preservation of
 pixel-exact imagery.
 
-## Datastream Structure
+### Datastream Structure
 
 A PNG file starts with an 8-byte signature:
 `89 50 4E 47 0D 0A 1A 0A`. The rest of the file is a sequence of chunks. Each
@@ -64,7 +65,7 @@ animation control data in newer specifications. Unknown ancillary chunks can
 generally be skipped; unknown critical chunks must not be ignored. This
 extension model is a major reason PNG has aged well.
 
-## Compression And Filtering
+### Compression And Filtering
 
 PNG uses scanline filtering before compression. Each scanline may use a filter
 that predicts pixel values from neighboring pixels, making the remaining data
@@ -77,7 +78,7 @@ PNG changes visually after recompression, the tool probably changed color
 metadata, bit depth, palette choices, transparency, or gamma handling rather
 than the compression itself.
 
-## Color And Transparency
+### Color And Transparency
 
 PNG supports palette images, grayscale, truecolor, and optional alpha channels.
 For web use, alpha transparency is one of its defining strengths. For archival
@@ -90,7 +91,7 @@ draft, but that draft is not the stable Recommendation. Older PNG files remain
 valid, but validators and preservation workflows should record which chunks are
 present rather than assuming every `.png` is a simple static image.
 
-## Preservation And Security Notes
+### Preservation And Security Notes
 
 PNG is comparatively simple, but decoders still need limits for huge dimensions,
 large compressed streams, malformed chunk lengths, CRC failures, and excessive
@@ -98,7 +99,7 @@ ancillary data. Preservation checks should verify the signature, chunk ordering,
 CRC values, final `IEND`, dimensions, color type, bit depth, and decompressible
 `IDAT` stream. Keep original color metadata when converting or optimizing files.
 
-## Further Reading
+### Further Reading
 
 - W3C PNG Specification, Third Edition: `https://www.w3.org/TR/png-3/`
 - PNG home site and libpng resources: `http://www.libpng.org/pub/png/`

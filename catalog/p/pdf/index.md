@@ -1,10 +1,11 @@
 ---
+overview: ".pdf is primarily used for Portable Document Format documents: fixed-layout pages for publishing, exchange, print workflows, forms, and preservation."
 extensions:
-  - name: "ISO 32000-2:2020, PDF 2.0"
-    description: "Current base PDF standard, ISO 32000-2:2020"
+  - name: "Portable Document Format (Adobe / ISO)"
+    description: "Fixed-layout document format standardized through ISO 32000; current base standard: ISO 32000-2:2020, PDF 2.0"
     categories:
     - documents
-    author: "ISO"
+    author: "Adobe / ISO"
     link: "https://www.iso.org/standard/75839.html"
 
   - name: "Adobe PDF Reference, version 1.6"
@@ -30,7 +31,7 @@ extensions:
     
 ---
 
-## Deep Dive
+## Portable Document Format (Adobe / ISO)
 
 PDF is a fixed-layout document format designed to preserve page appearance
 across software, printers, and operating systems. PDF originated with Adobe,
@@ -39,7 +40,7 @@ standard is ISO 32000-2:2020, PDF 2.0. The format matters because it is a
 publication format, an exchange format, a print workflow format, a forms
 container, and a long-term preservation target.
 
-## Object Model
+### Object Model
 
 A PDF file is organized as numbered indirect objects. Objects may describe page
 trees, fonts, images, vector graphics, annotations, metadata, forms, embedded
@@ -53,7 +54,7 @@ root of the object graph. Later PDF versions allow object streams and compressed
 cross-reference streams, which reduce file size but make manual inspection more
 difficult.
 
-## Incremental Updates
+### Incremental Updates
 
 PDF supports incremental saving. Instead of rewriting the whole file, an editor
 can append new objects, a new cross-reference section, and a new trailer. This
@@ -62,7 +63,7 @@ content may remain physically present in the file even when it is no longer
 visible. Redaction tools must remove sensitive content, not merely cover it with
 new drawing instructions.
 
-## Identification
+### Identification
 
 Most PDF files begin with a header such as `%PDF-1.7` or `%PDF-2.0`.
 Binary-safe PDFs commonly include a comment line containing non-ASCII bytes near
@@ -71,7 +72,7 @@ plain text. The end of the file normally contains `%%EOF`, but robust readers
 often tolerate trailing bytes or damaged offsets because PDFs are common in
 email, web, and scan workflows.
 
-## Preservation Profiles
+### Preservation Profiles
 
 Not every valid PDF is suitable for long-term preservation. PDF/A profiles vary
 by part and conformance level, but broadly restrict features that create
@@ -80,7 +81,7 @@ unembedded fonts, encryption, executable actions, and device-dependent color.
 For archival use, prefer a validated PDF/A profile, embedded fonts, explicit
 metadata, stable color management, and accessible structure when possible.
 
-## Security Notes
+### Security Notes
 
 PDF is complex enough to be a frequent attack surface. Risky features include
 JavaScript, launch actions, embedded files, rich media, malformed streams, and
@@ -88,7 +89,7 @@ parser differences between readers. Safe processing pipelines should use
 well-maintained libraries, disable active content where possible, and treat
 rendering, text extraction, and validation as separate tasks.
 
-## Further Reading
+### Further Reading
 
 - ISO 32000-2:2020: `https://www.iso.org/standard/75839.html`
 - PDF Association specification archive: `https://pdfa.org/resource/pdf-specification-archive/`

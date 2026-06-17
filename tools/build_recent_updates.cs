@@ -28,6 +28,10 @@ var serializer = new SerializerBuilder()
     .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
     .Build();
 
+var deserializer = new DeserializerBuilder()
+    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+    .Build();
+
 var updates = new List<Dictionary<string, object?>>();
 
 // Load catalog_flat name map (slug -> name) if available to show human-friendly names
@@ -37,9 +41,6 @@ if (File.Exists(catalogFlatFile))
 {
     try
     {
-        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
-            .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.UnderscoredNamingConvention.Instance)
-            .Build();
         var yaml = File.ReadAllText(catalogFlatFile);
         var items = deserializer.Deserialize<List<Dictionary<string, object?>>>(yaml) ?? new List<Dictionary<string, object?>>();
         foreach (var it in items)
@@ -79,12 +80,14 @@ else
         if (!Directory.Exists(path))
             continue;
 
+        var displayName = GetCatalogDisplayName(path) ?? (nameMap.TryGetValue(s.ext, out var nm) ? nm : s.ext);
+
         updates.Add(new Dictionary<string, object?>
         {
             ["letter"] = s.letter,
             ["slug"] = s.ext,
             ["path"] = Path.GetRelativePath(rootDir, path).Replace('\\', '/'),
-            ["name"] = nameMap.TryGetValue(s.ext, out var nm) ? nm : s.ext,
+            ["name"] = displayName,
             ["last_change_utc"] = s.lastChangeUtc.ToString("o"),
             ["last_change_date"] = s.lastChangeUtc.ToString("yyyy-MM-dd"),
             ["change_type"] = s.changeType,
@@ -211,6 +214,100 @@ List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> Get
     }
 
     return changes.Values.ToList();
+}
+
+string? GetCatalogDisplayName(string entryDir)
+{
+    var indexMd = Path.Combine(entryDir, "index.md");
+    if (!File.Exists(indexMd))
+        return null;
+
+    try
+    {
+        var lines = File.ReadAllLines(indexMd);
+        if (lines.Length < 3 || lines[0].Trim() != "---")
+            return null;
+
+        var fmEnd = -1;
+        for (var i = 1; i < lines.Length; i++)
+        {
+            if (lines[i].Trim() == "---")
+            {
+                fmEnd = i;
+                break;
+            }
+        }
+
+        if (fmEnd == -1)
+            return null;
+
+        var frontMatter = string.Join("\n", lines.Skip(1).Take(fmEnd - 1));
+        var metadata = deserializer.Deserialize<Dictionary<string, object?>>(frontMatter);
+        if (metadata == null)
+            return null;
+
+        if (metadata.TryGetValue("extensions", out var extensionsValue) &&
+            TryGetFirstExtensionName(extensionsValue, out var extensionName))
+        {
+            return extensionName;
+        }
+
+        foreach (var key in new[] { "title" })
+        {
+            if (metadata.TryGetValue(key, out var value) && value != null)
+            {
+                var text = value.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(text))
+                    return text;
+            }
+        }
+    }
+    catch
+    {
+        return null;
+    }
+
+    return null;
+}
+
+bool TryGetFirstExtensionName(object? value, out string name)
+{
+    name = "";
+
+    if (value is IEnumerable<object> sequence)
+    {
+        foreach (var item in sequence)
+            return TryGetMappingText(item, "name", out name) || TryGetMappingText(item, "title", out name);
+    }
+
+    return TryGetMappingText(value, "name", out name) || TryGetMappingText(value, "title", out name);
+}
+
+bool TryGetMappingText(object? value, string key, out string text)
+{
+    text = "";
+
+    if (value is IDictionary<object, object> objectDict)
+    {
+        foreach (var item in objectDict)
+        {
+            if (string.Equals(item.Key?.ToString(), key, StringComparison.OrdinalIgnoreCase) && item.Value != null)
+            {
+                text = item.Value.ToString()?.Trim() ?? "";
+                return !string.IsNullOrWhiteSpace(text);
+            }
+        }
+    }
+
+    if (value is IDictionary<string, object?> stringDict &&
+        stringDict.TryGetValue(key, out var stringValue) &&
+        stringValue != null)
+    {
+        text = stringValue.ToString()?.Trim() ?? "";
+        return !string.IsNullOrWhiteSpace(text);
+    }
+
+    return false;
 }
 
 bool IsShallowRepository(string repoRoot)

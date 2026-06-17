@@ -86,6 +86,8 @@ foreach (var letterDir in Directory.GetDirectories(catalogDir).OrderBy(d => d))
             var fmObj = deserializer.Deserialize<Dictionary<string, object?>>(frontmatterText!) ?? new();
             if (!fmObj.ContainsKey("extension")) fmObj["extension"] = ext;
             if (!fmObj.ContainsKey("letter")) fmObj["letter"] = letter; // convenience
+            if (fmObj.TryGetValue("extensions", out var extensionsValue))
+                EnrichResourceLinks(extensionsValue, letter, ext, extDir);
             // Re-serialize sanitized frontmatter
             var serializer = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             frontmatterText = serializer.Serialize(fmObj).TrimEnd();
@@ -126,3 +128,49 @@ foreach (var letterDir in Directory.GetDirectories(catalogDir).OrderBy(d => d))
 
 Console.WriteLine($"Generated/updated extension pages. Created: {created}, Updated: {updated}, Skipped: {skipped}");
 return 0;
+
+void EnrichResourceLinks(object? value, string letter, string ext, string sourceDir)
+{
+    if (value is IEnumerable<object> items)
+    {
+        foreach (var item in items)
+            EnrichResourceLinks(item, letter, ext, sourceDir);
+        return;
+    }
+
+    if (value is IDictionary<object, object> objectDict)
+    {
+        EnrichObjectResource(objectDict, letter, ext, sourceDir);
+        return;
+    }
+
+    if (value is IDictionary<string, object?> stringDict)
+        EnrichStringResource(stringDict, letter, ext, sourceDir);
+}
+
+void EnrichObjectResource(IDictionary<object, object> entry, string letter, string ext, string sourceDir)
+{
+    var fileKey = entry.Keys.FirstOrDefault(k => string.Equals(k?.ToString(), "file", StringComparison.OrdinalIgnoreCase));
+    if (fileKey == null || entry[fileKey] == null)
+        return;
+
+    var fileName = entry[fileKey].ToString()?.Trim();
+    if (string.IsNullOrWhiteSpace(fileName))
+        return;
+
+    entry["download_url"] = $"/files/{letter}/{ext}/{fileName}";
+    entry["file_missing"] = !File.Exists(Path.Combine(sourceDir, fileName));
+}
+
+void EnrichStringResource(IDictionary<string, object?> entry, string letter, string ext, string sourceDir)
+{
+    if (!entry.TryGetValue("file", out var fileValue) || fileValue == null)
+        return;
+
+    var fileName = fileValue.ToString()?.Trim();
+    if (string.IsNullOrWhiteSpace(fileName))
+        return;
+
+    entry["download_url"] = $"/files/{letter}/{ext}/{fileName}";
+    entry["file_missing"] = !File.Exists(Path.Combine(sourceDir, fileName));
+}

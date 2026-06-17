@@ -65,17 +65,17 @@ hero_cta_secondary: /how-to/
     <article class="feature-card">
       <h3>Explore the collection</h3>
       <p>Browse by format and category to find specs and decoding notes. For keyword searches, try a search engine with <code>site:wotsup.org</code>.</p>
-      <a href="/site-structure/">Explore the information architecture →</a>
+      <a href="/site-structure/">Explore the information architecture &rarr;</a>
     </article>
     <article class="feature-card">
       <h3>Engineering ready</h3>
       <p>Entries focus on structures, fields, and practical tips for building parsers.</p>
-      <a href="/how-to/">Developer guidance →</a>
+      <a href="/how-to/">Developer guidance &rarr;</a>
     </article>
     <article class="feature-card">
       <h3>Community powered</h3>
       <p>Submit corrections or new specs via GitHub. Every contribution is reviewed.</p>
-      <a href="/contributing/">Contributing guide →</a>
+      <a href="/contributing/">Contributing guide &rarr;</a>
     </article>
   </section>
 
@@ -118,10 +118,14 @@ hero_cta_secondary: /how-to/
       {% for g in groups limit:3 %}
       <li>
         <span class="timeline-date">{{ g.name | date: "%b %-d, %Y" }}</span>
-        <div>
+        <div class="timeline-updates">
           {% assign limit = 10 %}
           {% for u in g.items limit:limit %}
-            <p><strong>{{ u.name }}</strong> {{ u.change_type }} – <a href="{{ u.url }}">view</a></p>
+            <p class="recent-update">
+              <a class="recent-extension" href="{{ u.url }}"><code>.{{ u.slug }}</code></a>
+              <span class="recent-state">{{ u.change_type }}</span>
+              <span class="recent-title">{{ u.name }}</span>
+            </p>
           {% endfor %}
           {% if g.items.size > limit %}
             <p class="more-count">+{{ g.items.size | minus: limit }} more</p>
@@ -139,14 +143,14 @@ hero_cta_secondary: /how-to/
         and submit a pull request.</p>
     </div>
     <div class="cta-actions">
-    <a class="btn btn-primary" href="https://github.com/Matt-17/Wotsup.org">View the repository</a>
+      <a class="btn btn-primary" href="https://github.com/Matt-17/Wotsup.org">View the repository</a>
       <a class="btn" href="/contributing/">Contribution guide</a>
     </div>
   </section>
 
   <section class="landing-section tribute">
     <p>Built on the foundation of Wotsit.org, originally created by Paul Oliver and contributors worldwide.
-      Thanks to their pioneering work in documenting file formats. <a href="/about/">Read more about Wotsup.org →</a>
+      Thanks to their pioneering work in documenting file formats. <a href="/about/">Read more about Wotsup.org &rarr;</a>
     </p>
   </section>
 </div>

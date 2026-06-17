@@ -2,8 +2,17 @@
 layout: default
 ---
 <article class="extension-detail">
-    <header class="page-header">
-        <h1>{{ page.extension | upcase }} Extension</h1>
+    {% assign entries = page.extensions | default: page.descriptions %}
+    {% assign primary_entry = entries | first %}
+    <header class="extension-header">
+        <p class="extension-kicker">File extension</p>
+        <h1><code>.{{ page.extension }}</code></h1>
+        {% if primary_entry %}
+        <p class="extension-primary">{{ primary_entry.name | default: primary_entry.title | default: page.extension }}</p>
+        {% endif %}
+        {% if page.overview %}
+        <p class="extension-overview">{{ page.overview }}</p>
+        {% endif %}
         {% if page.aliases %}
         <p class="aliases">Also used as:
             {% for a in page.aliases %}<code>.{{ a }}</code>{% unless forloop.last %}, {% endunless %}{% endfor %}
@@ -11,50 +20,76 @@ layout: default
         {% endif %}
     </header>
 
-    {% assign entries = page.extensions | default: page.descriptions %}
     {% if entries and entries.size > 0 %}
     <section class="extension-entries">
-        <h2>Extensions</h2>
-        <table class="ext-meanings-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Resources</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for m in entries %}
-                <tr id="entry-{{ forloop.index }}">
-                    <td>{{ forloop.index }}</td>
-                    <td>{{ m.name | default: m.title | default: m.author | default: '—' }}</td>
-                    <td>{{ m.category | default: 'misc' }}</td>
-                    <td>{{ m.description | default: m.text | default: m.summary | default: '—' }}</td>
-                    <td>
-                        {% if m.resources %}
-                        {{ m.resources | size }} item{% if m.resources.size != 1 %}s{% endif %}
-                        {% elsif m.download_url or m.file or m.link or m.url or m.badlink %}
-                        1 item
-                        {% else %}
-                        —
+        <div class="section-heading compact">
+            <p class="eyebrow">Known meanings</p>
+            <h2>Formats and reference material for <code>.{{ page.extension }}</code></h2>
+        </div>
+        <div class="format-resource-list">
+            {% for m in entries %}
+            <div class="format-resource" id="entry-{{ forloop.index }}">
+                <div class="resource-main">
+                    <h3>{{ m.name | default: m.title | default: m.author | default: 'Untitled entry' }}</h3>
+                    <p>{{ m.description | default: m.text | default: m.summary | default: 'No description provided.' }}</p>
+                    <ul class="resource-meta">
+                        {% if m.categories %}
+                        <li>
+                            {% for category in m.categories %}
+                            <span>{{ category }}</span>
+                            {% endfor %}
+                        </li>
+                        {% elsif m.category %}
+                        <li><span>{{ m.category }}</span></li>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        {% if m.author %}
+                        <li>{{ m.author }}</li>
+                        {% endif %}
+                        {% if m.deprecated %}
+                        <li>Historical</li>
+                        {% endif %}
+                        {% if m.unverified %}
+                        <li>Unverified</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="resource-actions">
+                    {% if m.file_missing %}
+                    <span class="resource-missing">Missing file</span>
+                    {% elsif m.download_url %}
+                    <a class="resource-action" href="{{ m.download_url | relative_url }}" download>Download</a>
+                    {% elsif m.file %}
+                    {% assign file_url = '/files/' | append: page.letter | append: '/' | append: page.extension | append: '/' | append: m.file %}
+                    <a class="resource-action" href="{{ file_url | relative_url }}" download>Download</a>
+                    {% elsif m.link %}
+                    <a class="resource-action" href="{{ m.link }}">Open link</a>
+                    {% elsif m.url %}
+                    <a class="resource-action" href="{{ m.url }}">Open link</a>
+                    {% elsif m.badlink %}
+                    <span class="resource-missing">Unavailable</span>
+                    {% else %}
+                    <span class="resource-missing">No file</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </section>
     {% endif %}
 
+    {% assign body_text = content | strip %}
+    {% if body_text != '' %}
     <section class="extension-content">
-        <h2>Details</h2>
+        <div class="section-heading compact">
+            <p class="eyebrow">Details</p>
+            <h2>Format notes</h2>
+        </div>
         <div class="ext-toc" id="ext-toc"></div>
         <div class="ext-body">
             {{ content }}
         </div>
     </section>
+    {% endif %}
 </article>
 
 <script>

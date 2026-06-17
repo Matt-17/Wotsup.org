@@ -1,7 +1,8 @@
 ---
+overview: ".zip is primarily used for ZIP archives: compressed file bundles and container packages used by many higher-level formats."
 extensions:
-  - name: "ZIP File Format Specification version 6.3.10"
-    description: "Current public PKWARE APPNOTE, revised November 1, 2022"
+  - name: "ZIP Archive and Container Format"
+    description: "Compressed archive and package container format; current public PKWARE APPNOTE version 6.3.10, revised November 1, 2022"
     categories:
     - archive
     author: "PKWARE Inc."
@@ -29,7 +30,7 @@ extensions:
     file: zip63.zip
 ---
 
-## Deep Dive
+## ZIP Archive and Container Format
 
 ZIP is both an archive format and a lightweight container format. It is best
 known for bundling files with optional compression, but it also underpins many
@@ -38,7 +39,7 @@ books, OpenDocument files, Android packages, and some browser extension
 packages. That broad reuse makes ZIP one of the most important formats to
 understand when preserving, repairing, or inspecting modern files.
 
-## How ZIP Is Organized
+### How ZIP Is Organized
 
 A ZIP file is built from per-file local headers, compressed file data, optional
 data descriptors, a central directory, and an end-of-central-directory record.
@@ -52,7 +53,7 @@ the central directory is damaged, some recovery tools can still scan local file
 headers, but filename metadata, comments, extra fields, and duplicate-entry
 handling may no longer be reliable.
 
-## Identification
+### Identification
 
 Common ZIP signatures begin with the ASCII letters `PK`, named after Phil Katz.
 Useful signatures include `50 4B 03 04` for a local file header, `50 4B 01 02`
@@ -67,7 +68,7 @@ their own extension and may require specific internal files, such as
 `[Content_Types].xml` in Office Open XML or `META-INF/MANIFEST.MF` in many Java
 archives.
 
-## Compression And Compatibility
+### Compression And Compatibility
 
 The most common compression method is Deflate, but the ZIP specification has
 grown to include stored entries, ZIP64 extensions for large files, and optional
@@ -80,7 +81,7 @@ compressed sizes, archive offsets, central-directory sizes, or entry counts
 exceed the classic ZIP field limits. Older tools may reject ZIP64 archives or
 silently mishandle them.
 
-## Preservation And Security Notes
+### Preservation And Security Notes
 
 ZIP archives should be validated for central-directory consistency, duplicate
 filenames, path traversal entries such as `../`, absolute paths, malformed extra
@@ -89,7 +90,7 @@ archive checksum and member-level checksums when possible. For ZIP-derived
 formats, also validate the format-specific manifest and required directory
 layout rather than treating the file as a generic archive only.
 
-## Further Reading
+### Further Reading
 
 - PKWARE APPNOTE 6.3.10: `https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT`
 - IANA media type registration for `application/zip`
