@@ -1,7 +1,7 @@
 #!/usr/bin/env dotnet
 #:package YamlDotNet@16.2.0
 // tools/build_recent_updates.cs
-// Scan catalog/<letter>/<ext> folders by git commit history and emit the latest update batch to src/_data/recent_updates.yml
+// Scan catalog/<letter>/<ext> folders by git commit history and emit recent update dates to src/_data/recent_updates.yml
 // Run with: dotnet tools/build_recent_updates.cs
 
 #pragma warning disable IL3050
@@ -18,10 +18,10 @@ using YamlDotNet.Serialization.NamingConventions;
 var rootDir = Directory.GetCurrentDirectory();
 var catalogDir = Path.Combine(rootDir, "catalog");
 var outFile = Path.Combine(rootDir, "src", "_data", "recent_updates.yml");
-// Homepage should show the latest catalog-change day only. Older broad import
-// days can contain hundreds of legacy entries and should not reappear as "recent".
-var maxDays = 1;
-var maxCommitsToScan = 500;
+// Homepage should show the latest distinct dates that have visible catalog updates.
+var maxDays = 5;
+var maxEntriesPerDate = 10;
+var maxCommitsToScan = 1000;
 
 var serializer = new SerializerBuilder()
     .WithNamingConvention(UnderscoredNamingConvention.Instance)
@@ -71,11 +71,23 @@ else if (IsShallowRepository(rootDir))
 else
 {
     var recentChanges = GetRecentCatalogChanges(rootDir, maxDays, maxCommitsToScan);
-    foreach (var s in recentChanges
-        .OrderByDescending(s => s.lastChangeUtc)
-        .ThenBy(s => s.letter, StringComparer.OrdinalIgnoreCase)
-        .ThenBy(s => s.ext, StringComparer.OrdinalIgnoreCase))
+    var visibleChanges = recentChanges
+        .GroupBy(s => s.lastChange.ToString("yyyy-MM-dd"))
+        .OrderByDescending(g => g.Max(s => s.lastChange))
+        .SelectMany(g =>
+        {
+            var ordered = g
+                .OrderByDescending(s => s.lastChange)
+                .ThenBy(s => s.letter, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(s => s.ext, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            return ordered.Take(maxEntriesPerDate).Select(s => (change: s, dateUpdateCount: ordered.Count));
+        });
+
+    foreach (var item in visibleChanges)
     {
+        var s = item.change;
         var path = Path.Combine(catalogDir, s.letter, s.ext);
         if (!Directory.Exists(path))
             continue;
@@ -88,20 +100,21 @@ else
             ["slug"] = s.ext,
             ["path"] = Path.GetRelativePath(rootDir, path).Replace('\\', '/'),
             ["name"] = displayName,
-            ["last_change_utc"] = s.lastChangeUtc.ToString("o"),
-            ["last_change_date"] = s.lastChangeUtc.ToString("yyyy-MM-dd"),
+            ["last_change_utc"] = s.lastChange.ToUniversalTime().ToString("o"),
+            ["last_change_date"] = s.lastChange.ToString("yyyy-MM-dd"),
             ["change_type"] = s.changeType,
+            ["date_update_count"] = item.dateUpdateCount,
             ["url"] = $"/extensions/{s.letter}/{s.ext}/"
         });
     }
 }
 
-List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> GetRecentCatalogChanges(
+List<(string letter, string ext, DateTimeOffset lastChange, string changeType)> GetRecentCatalogChanges(
     string repoRoot,
     int daysToInclude,
     int commitScanLimit)
 {
-    var changes = new Dictionary<string, (string letter, string ext, DateTime lastChangeUtc, string changeType)>(
+    var changes = new Dictionary<string, (string letter, string ext, DateTimeOffset lastChange, string changeType)>(
         StringComparer.OrdinalIgnoreCase);
     var includedDates = new HashSet<DateTime>();
     var scannedCatalogCommits = 0;
@@ -110,7 +123,7 @@ List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> Get
     {
         var psi = new ProcessStartInfo(
             "git",
-            $"log --all --date-order --name-status --format=@@commit@@%x09%aI --max-count={commitScanLimit} -- catalog")
+            $"log --all --author-date-order --name-status --format=@@commit@@%x09%aI --max-count={commitScanLimit} -- catalog")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -133,17 +146,24 @@ List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> Get
             return changes.Values.ToList();
         }
 
-        DateTime currentCommitUtc = default;
+        DateTimeOffset currentCommit = default;
         var currentCommitChanges = new Dictionary<string, (string letter, string ext, List<string> statuses)>(
             StringComparer.OrdinalIgnoreCase);
         var stop = false;
 
         void FlushCommit()
         {
-            if (currentCommitUtc == default || currentCommitChanges.Count == 0 || stop)
+            if (currentCommit == default || currentCommitChanges.Count == 0 || stop)
                 return;
 
-            var commitDate = currentCommitUtc.Date;
+            var newItems = currentCommitChanges.Values
+                .Where(item => !changes.ContainsKey($"{item.letter}/{item.ext}"))
+                .ToList();
+
+            if (newItems.Count == 0)
+                return;
+
+            var commitDate = currentCommit.Date;
             if (!includedDates.Contains(commitDate) && includedDates.Count >= daysToInclude)
             {
                 stop = true;
@@ -153,17 +173,14 @@ List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> Get
             includedDates.Add(commitDate);
             scannedCatalogCommits++;
 
-            foreach (var item in currentCommitChanges.Values)
+            foreach (var item in newItems)
             {
                 var key = $"{item.letter}/{item.ext}";
-                if (changes.ContainsKey(key))
-                    continue;
-
                 var changeType = item.statuses.Count > 0 && item.statuses.All(s => s.StartsWith("A", StringComparison.OrdinalIgnoreCase))
                     ? "added"
                     : "updated";
 
-                changes[key] = (item.letter, item.ext, currentCommitUtc, changeType);
+                changes[key] = (item.letter, item.ext, currentCommit, changeType);
             }
         }
 
@@ -180,13 +197,13 @@ List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> Get
                     break;
 
                 currentCommitChanges.Clear();
-                currentCommitUtc = default;
+                currentCommit = default;
 
                 var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length >= 2 &&
-                    DateTime.TryParse(parts[1], null, DateTimeStyles.RoundtripKind, out var parsedDate))
+                    DateTimeOffset.TryParse(parts[1], null, DateTimeStyles.RoundtripKind, out var parsedDate))
                 {
-                    currentCommitUtc = parsedDate.ToUniversalTime();
+                    currentCommit = parsedDate;
                 }
                 continue;
             }

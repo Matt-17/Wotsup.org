@@ -115,11 +115,12 @@ hero_cta_secondary: /how-to/
     {% assign groups = '' | split: '' %}
     {% endif %}
     <ol class="timeline-list">
-      {% for g in groups limit:3 %}
+      {% for g in groups limit:5 %}
       <li>
         <span class="timeline-date">{{ g.name | date: "%b %-d, %Y" }}</span>
         <div class="timeline-updates">
           {% assign limit = 10 %}
+          {% assign date_update_count = g.items.first.date_update_count | default: g.items.size %}
           {% for u in g.items limit:limit %}
             <p class="recent-update">
               <a class="recent-extension" href="{{ u.url }}"><code>.{{ u.slug }}</code></a>
@@ -127,8 +128,8 @@ hero_cta_secondary: /how-to/
               <span class="recent-title">{{ u.name }}</span>
             </p>
           {% endfor %}
-          {% if g.items.size > limit %}
-            <p class="more-count">+{{ g.items.size | minus: limit }} more</p>
+          {% if date_update_count > limit %}
+            <p class="more-count">+{{ date_update_count | minus: limit }} more</p>
           {% endif %}
         </div>
       </li>
