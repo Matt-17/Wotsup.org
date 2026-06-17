@@ -1,7 +1,7 @@
 #!/usr/bin/env dotnet
 #:package YamlDotNet@16.2.0
 // tools/build_recent_updates.cs
-// Scan catalog/<letter>/<ext> folders by git commit history and emit top N recent updates to src/_data/recent_updates.yml
+// Scan catalog/<letter>/<ext> folders by git commit history and emit the latest update batch to src/_data/recent_updates.yml
 // Run with: dotnet tools/build_recent_updates.cs
 
 #pragma warning disable IL3050
@@ -18,8 +18,10 @@ using YamlDotNet.Serialization.NamingConventions;
 var rootDir = Directory.GetCurrentDirectory();
 var catalogDir = Path.Combine(rootDir, "catalog");
 var outFile = Path.Combine(rootDir, "src", "_data", "recent_updates.yml");
-// number of recent days to include (all items within each day)
-var maxDays = 3;
+// Homepage should show the latest catalog-change day only. Older broad import
+// days can contain hundreds of legacy entries and should not reappear as "recent".
+var maxDays = 1;
+var maxCommitsToScan = 500;
 
 var serializer = new SerializerBuilder()
     .WithNamingConvention(UnderscoredNamingConvention.Instance)
@@ -56,143 +58,32 @@ if (File.Exists(catalogFlatFile))
     }
 }
 
-// Helper: Get all commit dates for a path using git log
-List<DateTime> GetGitCommitDates(string repoRoot, string relPath)
-{
-    var dates = new List<DateTime>();
-    try
-    {
-        var psi = new ProcessStartInfo("git", $"log --format=%aI --all -- \"{relPath}\"")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = repoRoot
-        };
-        using var p = Process.Start(psi);
-        if (p == null) return dates;
-
-        var output = p.StandardOutput.ReadToEnd();
-        p.WaitForExit();
-
-        if (p.ExitCode == 0 && !string.IsNullOrWhiteSpace(output))
-        {
-            foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-            {
-                if (DateTime.TryParse(line.Trim(), null, DateTimeStyles.RoundtripKind, out var dt))
-                {
-                    dates.Add(dt.ToUniversalTime());
-                }
-            }
-        }
-    }
-    catch
-    {
-        // git not available or error
-    }
-    return dates;
-}
-
 if (!Directory.Exists(catalogDir))
 {
     Console.WriteLine($"No catalog at {catalogDir}. Skipping recent updates.");
 }
+else if (IsShallowRepository(rootDir))
+{
+    Console.Error.WriteLine("Error: recent updates require full git history. Re-run after fetching with fetch-depth: 0 or unshallowing the clone.");
+    return 1;
+}
 else
 {
-    // Get all extension directories that were changed in the last N commits
-    var changedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    try
+    var recentChanges = GetRecentCatalogChanges(rootDir, maxDays, maxCommitsToScan);
+    foreach (var s in recentChanges
+        .OrderByDescending(s => s.lastChangeUtc)
+        .ThenBy(s => s.letter, StringComparer.OrdinalIgnoreCase)
+        .ThenBy(s => s.ext, StringComparer.OrdinalIgnoreCase))
     {
-        var psi = new ProcessStartInfo("git", $"log --all --name-only --format= -3")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = rootDir
-        };
-        using var p = Process.Start(psi);
-        if (p != null)
-        {
-            var output = p.StandardOutput.ReadToEnd();
-            p.WaitForExit();
+        var path = Path.Combine(catalogDir, s.letter, s.ext);
+        if (!Directory.Exists(path))
+            continue;
 
-            foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-            {
-                var trimmed = line.Trim();
-                if (trimmed.StartsWith("catalog/", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Extract letter/ext from catalog/letter/ext/file
-                    var parts = trimmed.Split('/');
-                    if (parts.Length >= 3)
-                    {
-                        var letterExt = $"{parts[1]}/{parts[2]}";
-                        changedPaths.Add(letterExt);
-                    }
-                }
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"Warning: failed to get changed paths from git: {ex.Message}");
-    }
-
-    // Only process extensions that were actually changed
-    var extDirs = Directory.GetDirectories(catalogDir)
-        .SelectMany(letterDir => Directory.GetDirectories(letterDir)
-            .Select(extDir => new { letter = Path.GetFileName(letterDir), ext = Path.GetFileName(extDir), path = extDir }))
-        .Where(d => changedPaths.Contains($"{d.letter}/{d.ext}"))
-        .ToList();
-
-    var scored = new List<(string letter, string ext, string path, DateTime lastChangeUtc, string changeType)>();
-    foreach (var d in extDirs)
-    {
-        try
-        {
-            var relPath = Path.GetRelativePath(rootDir, d.path).Replace('\\', '/');
-            DateTime lastChange;
-            string changeType = "updated";
-
-            // Try git first
-            var commitDates = GetGitCommitDates(rootDir, relPath);
-            if (commitDates.Count > 0)
-            {
-                var sorted = commitDates.OrderBy(dt => dt).ToList();
-                lastChange = sorted.Last();
-                changeType = commitDates.Count == 1 ? "added" : "updated";
-            }
-            else
-            {
-                // Fallback to filesystem
-                lastChange = GetFilesystemTime(d.path);
-                changeType = "added";
-            }
-
-            scored.Add((d.letter!, d.ext!, d.path!, lastChange.ToUniversalTime(), changeType));
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Warning: failed to get last change time for {d.path}: {ex.Message}");
-        }
-    }
-
-    // Group by UTC date (year-month-day) and include all items in the most recent N days
-    var grouped = scored
-        .GroupBy(s => s.lastChangeUtc.Date)
-        .OrderByDescending(g => g.Key)
-        .Take(maxDays)
-        .SelectMany(g => g.OrderByDescending(s => s.lastChangeUtc))
-        .ToList();
-
-    foreach (var s in grouped)
-    {
         updates.Add(new Dictionary<string, object?>
         {
             ["letter"] = s.letter,
             ["slug"] = s.ext,
-            ["path"] = Path.GetRelativePath(rootDir, s.path),
+            ["path"] = Path.GetRelativePath(rootDir, path).Replace('\\', '/'),
             ["name"] = nameMap.TryGetValue(s.ext, out var nm) ? nm : s.ext,
             ["last_change_utc"] = s.lastChangeUtc.ToString("o"),
             ["last_change_date"] = s.lastChangeUtc.ToString("yyyy-MM-dd"),
@@ -202,19 +93,177 @@ else
     }
 }
 
-DateTime GetFilesystemTime(string dirPath)
+List<(string letter, string ext, DateTime lastChangeUtc, string changeType)> GetRecentCatalogChanges(
+    string repoRoot,
+    int daysToInclude,
+    int commitScanLimit)
 {
-    var info = new DirectoryInfo(dirPath);
-    var lastChange = info.LastWriteTimeUtc;
-    var idxMd = Path.Combine(dirPath, "index.md");
-    var idxYaml = Path.Combine(dirPath, "index.yaml");
-    var files = new[] { idxMd, idxYaml }.Where(File.Exists).ToList();
-    if (files.Count > 0)
+    var changes = new Dictionary<string, (string letter, string ext, DateTime lastChangeUtc, string changeType)>(
+        StringComparer.OrdinalIgnoreCase);
+    var includedDates = new HashSet<DateTime>();
+    var scannedCatalogCommits = 0;
+
+    try
     {
-        var latestFileTime = files.Select(f => new FileInfo(f).LastWriteTimeUtc).DefaultIfEmpty(lastChange).Max();
-        lastChange = latestFileTime > lastChange ? latestFileTime : lastChange;
+        var psi = new ProcessStartInfo(
+            "git",
+            $"log --all --date-order --name-status --format=@@commit@@%x09%aI --max-count={commitScanLimit} -- catalog")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = repoRoot
+        };
+
+        using var p = Process.Start(psi);
+        if (p == null)
+            return changes.Values.ToList();
+
+        var output = p.StandardOutput.ReadToEnd();
+        var error = p.StandardError.ReadToEnd();
+        p.WaitForExit();
+
+        if (p.ExitCode != 0)
+        {
+            Console.Error.WriteLine($"Warning: git log failed while building recent updates: {error.Trim()}");
+            return changes.Values.ToList();
+        }
+
+        DateTime currentCommitUtc = default;
+        var currentCommitChanges = new Dictionary<string, (string letter, string ext, List<string> statuses)>(
+            StringComparer.OrdinalIgnoreCase);
+        var stop = false;
+
+        void FlushCommit()
+        {
+            if (currentCommitUtc == default || currentCommitChanges.Count == 0 || stop)
+                return;
+
+            var commitDate = currentCommitUtc.Date;
+            if (!includedDates.Contains(commitDate) && includedDates.Count >= daysToInclude)
+            {
+                stop = true;
+                return;
+            }
+
+            includedDates.Add(commitDate);
+            scannedCatalogCommits++;
+
+            foreach (var item in currentCommitChanges.Values)
+            {
+                var key = $"{item.letter}/{item.ext}";
+                if (changes.ContainsKey(key))
+                    continue;
+
+                var changeType = item.statuses.Count > 0 && item.statuses.All(s => s.StartsWith("A", StringComparison.OrdinalIgnoreCase))
+                    ? "added"
+                    : "updated";
+
+                changes[key] = (item.letter, item.ext, currentCommitUtc, changeType);
+            }
+        }
+
+        foreach (var rawLine in output.Split('\n'))
+        {
+            var line = rawLine.TrimEnd('\r');
+            if (line.Length == 0)
+                continue;
+
+            if (line.StartsWith("@@commit@@", StringComparison.Ordinal))
+            {
+                FlushCommit();
+                if (stop)
+                    break;
+
+                currentCommitChanges.Clear();
+                currentCommitUtc = default;
+
+                var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2 &&
+                    DateTime.TryParse(parts[1], null, DateTimeStyles.RoundtripKind, out var parsedDate))
+                {
+                    currentCommitUtc = parsedDate.ToUniversalTime();
+                }
+                continue;
+            }
+
+            if (TryParseCatalogStatusLine(line, out var status, out var letter, out var ext))
+            {
+                var key = $"{letter}/{ext}";
+                if (!currentCommitChanges.TryGetValue(key, out var existing))
+                {
+                    existing = (letter, ext, new List<string>());
+                    currentCommitChanges[key] = existing;
+                }
+                existing.statuses.Add(status);
+            }
+        }
+
+        FlushCommit();
+
+        if (scannedCatalogCommits == 0)
+            Console.Error.WriteLine("Warning: no catalog changes found in git history; recent updates will be empty.");
     }
-    return lastChange;
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Warning: failed to build recent updates from git history: {ex.Message}");
+    }
+
+    return changes.Values.ToList();
+}
+
+bool IsShallowRepository(string repoRoot)
+{
+    try
+    {
+        var psi = new ProcessStartInfo("git", "rev-parse --is-shallow-repository")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = repoRoot
+        };
+
+        using var p = Process.Start(psi);
+        if (p == null)
+            return false;
+
+        var output = p.StandardOutput.ReadToEnd();
+        p.StandardError.ReadToEnd();
+        p.WaitForExit();
+
+        return p.ExitCode == 0 && output.Trim().Equals("true", StringComparison.OrdinalIgnoreCase);
+    }
+    catch
+    {
+        return false;
+    }
+}
+
+bool TryParseCatalogStatusLine(string line, out string status, out string letter, out string ext)
+{
+    status = "";
+    letter = "";
+    ext = "";
+
+    var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+    if (parts.Length < 2)
+        return false;
+
+    status = parts[0].Trim();
+    var path = parts[^1].Trim().Replace('\\', '/');
+    if (!path.StartsWith("catalog/", StringComparison.OrdinalIgnoreCase))
+        return false;
+
+    var pathParts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+    if (pathParts.Length < 3)
+        return false;
+
+    letter = pathParts[1];
+    ext = pathParts[2];
+    return !string.IsNullOrWhiteSpace(letter) && !string.IsNullOrWhiteSpace(ext);
 }
 
 Directory.CreateDirectory(Path.GetDirectoryName(outFile)!);

@@ -1,21 +1,28 @@
 ---
 extensions:
-  - name: "Adobe Portable Document Reference version 1.6"
-    description: "Adobe Portable Document Reference version 1.6"
+  - name: "ISO 32000-2:2020, PDF 2.0"
+    description: "Current base PDF standard, ISO 32000-2:2020"
+    categories:
+    - documents
+    author: "ISO"
+    link: "https://www.iso.org/standard/75839.html"
+
+  - name: "Adobe PDF Reference, version 1.6"
+    description: "Adobe PDF Reference, version 1.6"
     categories:
     - documents
     author: "Adobe"
     file: pdfreference16.pdf
     
-  - name: "Adobe Portable Document Reference version 1.7"
-    description: "Adobe Portable Document Reference version 1.7"
+  - name: "Adobe PDF Reference, version 1.7"
+    description: "Adobe PDF Reference, version 1.7"
     categories:
     - documents
     author: "Adobe"
     file: pdfreference17.pdf
     
-  - name: "Portable Document Format Reference Manual Version 1.3 - March 11, 1999 (Acrobat)"
-    description: "Portable Document Format Reference Manual Version 1.3 - March 11, 1999 (Acrobat)"
+  - name: "Adobe PDF Reference, version 1.3"
+    description: "Portable Document Format Reference Manual Version 1.3, March 11, 1999"
     categories:
     - documents
     author: "Adobe"
@@ -26,10 +33,11 @@ extensions:
 ## Deep Dive
 
 PDF is a fixed-layout document format designed to preserve page appearance
-across software, printers, and operating systems. It grew out of Adobe's
-document and PostScript work, but modern PDF is maintained through ISO 32000.
-The format matters because it is a publication format, an exchange format, a
-print workflow format, a forms container, and a long-term preservation target.
+across software, printers, and operating systems. PDF originated with Adobe,
+but the base format is now standardized through ISO 32000. The current base
+standard is ISO 32000-2:2020, PDF 2.0. The format matters because it is a
+publication format, an exchange format, a print workflow format, a forms
+container, and a long-term preservation target.
 
 ## Object Model
 
@@ -56,19 +64,21 @@ new drawing instructions.
 
 ## Identification
 
-Most PDF files begin with a header such as `%PDF-1.7`. Binary-safe files usually
-include non-ASCII bytes early in the file so transfer systems do not treat the
-document as plain text. The end of the file normally contains `%%EOF`, but robust
-readers often tolerate trailing bytes or damaged offsets because PDFs are common
-in email, web, and scan workflows.
+Most PDF files begin with a header such as `%PDF-1.7` or `%PDF-2.0`.
+Binary-safe PDFs commonly include a comment line containing non-ASCII bytes near
+the beginning of the file so transfer systems do not mistake the document for
+plain text. The end of the file normally contains `%%EOF`, but robust readers
+often tolerate trailing bytes or damaged offsets because PDFs are common in
+email, web, and scan workflows.
 
 ## Preservation Profiles
 
-Not every valid PDF is suitable for long-term preservation. PDF/A profiles
-restrict features that create external dependencies or uncertain rendering, such
-as unembedded fonts, encryption, and device-dependent color. For archival use,
-prefer a validated PDF/A profile, embedded fonts, explicit metadata, stable
-color management, and accessible structure when possible.
+Not every valid PDF is suitable for long-term preservation. PDF/A profiles vary
+by part and conformance level, but broadly restrict features that create
+external dependencies, active behavior, or uncertain rendering, such as
+unembedded fonts, encryption, executable actions, and device-dependent color.
+For archival use, prefer a validated PDF/A profile, embedded fonts, explicit
+metadata, stable color management, and accessible structure when possible.
 
 ## Security Notes
 
@@ -80,7 +90,6 @@ rendering, text extraction, and validation as separate tasks.
 
 ## Further Reading
 
-- Adobe PDF Reference archive
-- ISO 32000: core PDF specification family
-- PDF Association specification index: `https://pdfa.org/resource/pdf-specification-index/`
+- ISO 32000-2:2020: `https://www.iso.org/standard/75839.html`
+- PDF Association specification archive: `https://pdfa.org/resource/pdf-specification-archive/`
 - Related profiles: PDF/A, PDF/X, PDF/UA, PDF/E

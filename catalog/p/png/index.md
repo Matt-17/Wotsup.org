@@ -1,23 +1,30 @@
 ---
 extensions:
-  - name: "Portable Network Graphics Specification"
-    description: "Portable Network Graphics Specification"
+  - name: "Portable Network Graphics Specification (Third Edition)"
+    description: "W3C Recommendation, 2025"
     categories:
     - 2d-graphics
-    author: "Tom Boutell"
+    author: "W3C PNG Working Group"
+    link: "https://www.w3.org/TR/png-3/"
+
+  - name: "Portable Network Graphics Specification (historical)"
+    description: "Historical Portable Network Graphics specification"
+    categories:
+    - 2d-graphics
+    author: "Thomas Boutell et al."
     link: "http://www.boutell.com/boutell/png/"
     deprecated: true
     
-  - name: "Portable Network Graphics Specification"
-    description: "Portable Network Graphics Specification"
+  - name: "Portable Network Graphics Specification (historical)"
+    description: "Historical Portable Network Graphics specification"
     categories:
     - 2d-graphics
-    author: "T. Boutell et al"
+    author: "Thomas Boutell et al."
     file: png.zip
     deprecated: true
     
-  - name: "PNG-16 File Format"
-    description: "PNG-16 File Format"
+  - name: "PNG-16 File Format Proposal"
+    description: "Historical nonstandard PNG-related 16-bit-pixel proposal"
     categories:
     - 2d-graphics
     author: "Rich Franzen"
@@ -54,15 +61,16 @@ chunks define the image itself: `IHDR` gives image dimensions and color type,
 Ancillary chunks carry optional information such as gamma, chromaticity, ICC
 profiles, text, timestamps, physical pixel dimensions, Exif metadata, and
 animation control data in newer specifications. Unknown ancillary chunks can
-usually be skipped by older readers, which is a major reason PNG has aged well.
+generally be skipped; unknown critical chunks must not be ignored. This
+extension model is a major reason PNG has aged well.
 
 ## Compression And Filtering
 
 PNG uses scanline filtering before compression. Each scanline may use a filter
 that predicts pixel values from neighboring pixels, making the remaining data
-more compressible. The filtered byte stream is then compressed with Deflate.
-Because filtering is lossless, a decoded PNG should reproduce the original
-sample values exactly, subject to color-management interpretation.
+more compressible. The filtered byte stream is then compressed using
+zlib/Deflate. Because filtering is lossless, a decoded PNG should reproduce the
+original sample values exactly, subject to color-management interpretation.
 
 Compression level affects file size and encoding time, not image quality. If a
 PNG changes visually after recompression, the tool probably changed color
@@ -76,10 +84,11 @@ For web use, alpha transparency is one of its defining strengths. For archival
 or prepress workflows, color chunks such as `sRGB`, `gAMA`, `cHRM`, and `iCCP`
 matter because they influence how sample values should be displayed.
 
-The 2025 W3C PNG Third Edition adds modernized support around areas such as
-animation, Exif metadata, and HDR-related color information. Older PNG files
-remain valid, but validators and preservation workflows should record which
-chunks are present rather than assuming every `.png` is a simple static image.
+The 2025 W3C PNG Third Edition is the stable W3C Recommendation and incorporates
+APNG and HDR-related updates. W3C also maintains a newer Fourth Edition editor's
+draft, but that draft is not the stable Recommendation. Older PNG files remain
+valid, but validators and preservation workflows should record which chunks are
+present rather than assuming every `.png` is a simple static image.
 
 ## Preservation And Security Notes
 
@@ -91,6 +100,6 @@ CRC values, final `IEND`, dimensions, color type, bit depth, and decompressible
 
 ## Further Reading
 
-- W3C PNG Specification: `https://www.w3.org/TR/png/`
+- W3C PNG Specification, Third Edition: `https://www.w3.org/TR/png-3/`
 - PNG home site and libpng resources: `http://www.libpng.org/pub/png/`
 - Related formats: APNG, MNG, JNG, GIF, WebP
