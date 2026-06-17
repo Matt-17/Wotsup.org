@@ -17,11 +17,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Install dotnet-script
-        run: dotnet tool install -g dotnet-script
-
       - name: YAML Schema Validation
-        run: dotnet script tools/validate_yaml_schema.cs
+        run: dotnet tools/validate_yaml_schema.cs
+
+      - name: Catalog Validation
+        run: dotnet tools/validate_catalog.cs
 
       - name: Generated Data Integrity Check
         shell: pwsh

@@ -17,7 +17,7 @@
 // aliases: [ pdff ]
 // ---
 // (Markdown body follows)
-// Run with: dotnet build_catalog_data.cs
+// Run with: dotnet tools/build_catalog_data.cs
 
 #pragma warning disable IL3050 // AOT warnings not applicable to build-time tools
 

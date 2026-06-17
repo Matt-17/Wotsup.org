@@ -54,6 +54,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: YAML Schema Validation
+        run: dotnet tools/validate_yaml_schema.cs
+
+      - name: Catalog Validation
+        run: dotnet tools/validate_catalog.cs
+
       - name: Run data generators
         shell: pwsh
         run: |

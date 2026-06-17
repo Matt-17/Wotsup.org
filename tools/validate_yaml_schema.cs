@@ -1,10 +1,11 @@
 #!/usr/bin/env dotnet
+#:package YamlDotNet@16.2.0
 // tools/validate_yaml_schema.cs
 // Validate catalog YAML files for required keys and uniqueness.
 // Exit with non-zero on failure.
 
 #nullable enable
-#r "nuget: YamlDotNet, 16.2.0"
+#pragma warning disable IL3050 // Dynamic code warnings are not relevant for build-time tooling.
 
 using System;
 using System.Collections.Generic;
