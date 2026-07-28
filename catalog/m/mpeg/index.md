@@ -1,4 +1,5 @@
 ---
+overview: ".mpeg/.mpg files are MPEG program streams: audio and video coded with the MPEG-1 or MPEG-2 standards and multiplexed together, the format behind Video CD, DVD-Video, and digital broadcast."
 extensions:
   - name: "ISO/IEC 13818-1 MPEG-2 Systems"
     description: "ISO/IEC 13818-1 MPEG-2 Systems"
@@ -115,3 +116,38 @@ extensions:
     deprecated: true
     
 ---
+
+## MPEG (MPEG-1 / MPEG-2)
+
+MPEG refers to the family of audio-video standards from the Moving Picture Experts
+Group. A `.mpeg` or `.mpg` file most commonly holds MPEG-1 or MPEG-2 compressed
+video together with MPEG audio, multiplexed into a single stream. These standards
+made digital video practical at consumer bitrates and underpin a generation of
+technology: MPEG-1 powered Video CD and the MP3 audio format (MPEG-1 Audio Layer
+III), while MPEG-2 powers DVD-Video and much of digital television.
+
+MPEG defines both the coding of the elementary video and audio streams and how they
+are combined. The Program Stream, used for storage such as DVDs, multiplexes audio
+and video for relatively error-free media, while the Transport Stream is designed
+for broadcast and streaming where errors are expected. Video compression relies on
+motion-compensated prediction between frames (I-, P-, and B-frames) plus
+block-based transform coding, achieving large size reductions at the cost of being
+lossy.
+
+### Status And Preservation Notes
+
+MPEG-1/2 remain widely playable and important for legacy media, though newer codecs
+(H.264, HEVC, AV1) are far more efficient for new content. Because the video is
+lossy, a preservation master should be the highest-quality source available; record
+the specific standard, profile, and stream type (program vs transport). The common
+media type is `video/mpeg`.
+
+### Security Notes
+
+As a byte-stream format parsed with start codes and length fields, MPEG demuxers and
+decoders should validate stream structure from untrusted files, since malformed
+packets and headers are a known source of decoder vulnerabilities.
+
+### Further Reading
+
+- MPEG standards overview: `https://www.mpeg.org/` and `https://en.wikipedia.org/wiki/Moving_Picture_Experts_Group`
