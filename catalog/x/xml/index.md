@@ -5,7 +5,7 @@ extensions:
     description: "Extensible Markup Language (XML) 1.0"
     categories:
     - internet
-    link: "http://www.w3.org/TR/REC-xml"
+    link: "https://www.w3.org/TR/REC-xml/"
 ---
 
 ## Extensible Markup Language (XML)

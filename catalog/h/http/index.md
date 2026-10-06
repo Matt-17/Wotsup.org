@@ -5,5 +5,5 @@ extensions:
     categories:
     - internet
     author: "W3C"
-    link: "http://www.w3.org/Protocols/"
+    link: "https://www.w3.org/Protocols/"
 ---

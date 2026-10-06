@@ -4,7 +4,7 @@ extensions:
     description: "ETSI ETS 300 838 Fax format"
     categories:
     - communication-formats
-    link: "http://www.etsi.org/"
+    link: "https://www.etsi.org/"
     
   - name: "ITU T.200 Fax file format"
     description: "ITU T.200 Fax file format"

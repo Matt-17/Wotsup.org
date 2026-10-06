@@ -12,6 +12,6 @@ extensions:
     categories:
     - video-animation
     author: "Motion Lab Systems, Inc."
-    link: "http://www.c3d.org/"
+    link: "https://www.c3d.org/"
     
 ---

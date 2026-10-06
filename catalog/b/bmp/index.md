@@ -12,7 +12,7 @@ extensions:
     description: "OS/2 Bitmap format"
     categories:
     - 2d-graphics
-    link: "http://www.edm2.com/0107/os2bmp.html"
+    link: "https://www.edm2.com/0107/os2bmp.html"
 
   - name: "The .bmp file format"
     description: "Historical BMP file format reference"

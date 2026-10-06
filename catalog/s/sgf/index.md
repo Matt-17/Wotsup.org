@@ -4,5 +4,5 @@ extensions:
     description: "Smart Game Format"
     categories:
     - game-files
-    link: "http://www.red-bean.com/sgf/"
+    link: "https://www.red-bean.com/sgf/"
 ---

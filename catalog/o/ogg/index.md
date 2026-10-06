@@ -13,7 +13,7 @@ extensions:
     categories:
     - audio
     author: "Xiph.org"
-    link: "http://www.xiph.org/ogg/doc/"
+    link: "https://www.xiph.org/ogg/doc/"
 ---
 
 ## Ogg

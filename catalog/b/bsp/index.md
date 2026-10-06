@@ -5,6 +5,6 @@ extensions:
     categories:
     - game-files
     author: "Max McGuire"
-    link: "http://www.flipcode.com/tutorials/tut_q2levels.shtml"
+    link: "https://www.flipcode.com/tutorials/tut_q2levels.shtml"
     deprecated: true
 ---

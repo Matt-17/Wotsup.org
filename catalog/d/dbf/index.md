@@ -19,7 +19,7 @@ extensions:
     categories:
     - spreadsheets
     author: "Erik Bachmann"
-    link: "http://www.clicketyclick.dk/databases/xbase/format/"
+    link: "https://www.clicketyclick.dk/databases/xbase/format/"
     
   - name: "File Structure (dBASE III/dBASE IV/Foxbase/Foxpro)"
     description: "File Structure (dBASE III/dBASE IV/Foxbase/Foxpro)"

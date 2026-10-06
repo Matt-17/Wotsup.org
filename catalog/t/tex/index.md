@@ -5,7 +5,7 @@ extensions:
     description: "TeX, LaTeX, makeindx, Metafont formats"
     categories:
     - documents
-    link: "http://www.dante.de/"
+    link: "https://www.dante.de/"
 
   - name: "MusiXTeX, PMX, M-Tx formats"
     description: "MusiXTeX, PMX, M-Tx formats"

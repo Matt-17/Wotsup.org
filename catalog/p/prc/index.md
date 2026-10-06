@@ -5,5 +5,5 @@ extensions:
     categories:
     - binaries
     author: "Theodore Ts'o"
-    link: "http://web.mit.edu/tytso/www/pilot/prc-format.html"
+    link: "https://web.mit.edu/tytso/www/pilot/prc-format.html"
 ---

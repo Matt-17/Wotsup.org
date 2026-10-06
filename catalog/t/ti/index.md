@@ -4,5 +4,5 @@ extensions:
     description: "Texas Instruments Calculator Files"
     categories:
     - misc
-    link: "http://www.ticalc.org/"
+    link: "https://www.ticalc.org/"
 ---

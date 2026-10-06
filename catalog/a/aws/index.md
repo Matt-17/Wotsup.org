@@ -4,5 +4,5 @@ extensions:
     description: "AWSTAPE virtual tape drive Utilities and information"
     categories:
     - misc
-    link: "http://www.cbttape.org/awstape.htm"
+    link: "https://www.cbttape.org/awstape.htm"
 ---

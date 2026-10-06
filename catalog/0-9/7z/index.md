@@ -6,7 +6,7 @@ extensions:
     categories:
     - archive
     author: "Igor Pavlov"
-    link: "http://www.7-zip.org/sdk.html"
+    link: "https://www.7-zip.org/sdk.html"
 ---
 
 ## 7z Archive

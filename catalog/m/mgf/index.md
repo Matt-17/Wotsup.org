@@ -5,6 +5,6 @@ extensions:
     categories:
     - 3d-graphics
     author: "Greg Ward"
-    link: "http://radsite.lbl.gov/mgf/HOME.html"
+    link: "https://radsite.lbl.gov/mgf/HOME.html"
         
 ---

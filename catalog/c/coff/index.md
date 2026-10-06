@@ -5,5 +5,5 @@ extensions:
     categories:
     - binaries
     author: "D.J. Delorie"
-    link: "http://www.delorie.com/djgpp/doc/coff/"
+    link: "https://www.delorie.com/djgpp/doc/coff/"
 ---

@@ -5,5 +5,5 @@ extensions:
     categories:
     - game-files
     author: "David Fotland"
-    link: "http://www.britgo.org/tech/ishispec.html"
+    link: "https://www.britgo.org/tech/ishispec.html"
 ---

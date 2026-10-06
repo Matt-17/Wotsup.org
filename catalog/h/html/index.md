@@ -19,13 +19,13 @@ extensions:
     categories:
     - internet
     author: "Dave Raggett"
-    link: "http://www.w3.org/TR/REC-html40/"
+    link: "https://www.w3.org/TR/REC-html40/"
 
   - name: "HTML 4.01 Specification (W3C approved)"
     description: "HTML 4.01 Specification (W3C approved)"
     categories:
     - internet
-    link: "http://www.w3.org/TR/html4/"
+    link: "https://www.w3.org/TR/html4/"
     
 ---
 

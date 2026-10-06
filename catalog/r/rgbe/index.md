@@ -4,5 +4,5 @@ extensions:
     description: "RGBE File Format"
     categories:
     - 2d-graphics
-    link: "http://www.graphics.cornell.edu/~bjw/rgbe.html"
+    link: "https://www.graphics.cornell.edu/~bjw/rgbe.html"
 ---

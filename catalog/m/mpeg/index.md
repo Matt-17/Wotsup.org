@@ -91,7 +91,7 @@ extensions:
     description: "MPEG.ORG site"
     categories:
     - video-animation
-    link: "http://www.mpeg.org/"
+    link: "https://www.mpeg.org/"
     
   - name: "ISO/IEC 13818 MPEG 2 Format (9 parts)"
     description: "ISO/IEC 13818 MPEG 2 Format (9 parts)"

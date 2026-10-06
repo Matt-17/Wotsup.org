@@ -5,7 +5,7 @@ extensions:
     description: "Standard Generalized Markup Language (SGML)"
     categories:
     - internet
-    link: "http://xml.coverpages.org/sgml.html"
+    link: "https://xml.coverpages.org/sgml.html"
 ---
 
 ## Standard Generalized Markup Language (SGML)

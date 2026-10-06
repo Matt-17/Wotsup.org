@@ -5,7 +5,7 @@ extensions:
     categories:
     - 2d-graphics
     author: "NASA"
-    link: "http://fits.gsfc.nasa.gov/"
+    link: "https://fits.gsfc.nasa.gov/"
     
   - name: "FITS Draft Spec Dec 1990 (Acrobat)"
     description: "FITS Draft Spec Dec 1990 (Acrobat)"

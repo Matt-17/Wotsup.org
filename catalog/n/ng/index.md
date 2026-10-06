@@ -5,5 +5,5 @@ extensions:
     categories:
     - misc
     author: "Dave Pearson"
-    link: "http://www.davep.org/norton-guides/file-format/"
+    link: "https://www.davep.org/norton-guides/file-format/"
 ---
