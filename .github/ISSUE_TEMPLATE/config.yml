@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Browse Wotsup.org
+    url: https://wotsup.org/
+    about: Search the catalog before reporting a missing format.
+  - name: Contribution guide
+    url: https://wotsup.org/contributing/
+    about: Learn how to add or improve catalog content.

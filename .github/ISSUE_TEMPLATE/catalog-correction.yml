@@ -1,0 +1,43 @@
+name: Catalog correction
+description: Report an inaccurate entry, broken reference, or missing detail.
+title: "[Catalog correction] "
+labels:
+  - documentation
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Catalog page
+      placeholder: "https://wotsup.org/extensions/z/zip/"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Correction type
+      options:
+        - Incorrect technical information
+        - Broken or outdated link
+        - Missing format meaning
+        - Missing attribution
+        - Typo or presentation issue
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: What is currently wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Suggested correction
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Supporting sources
+      description: Prefer primary specifications, vendor documentation, standards, or source code.

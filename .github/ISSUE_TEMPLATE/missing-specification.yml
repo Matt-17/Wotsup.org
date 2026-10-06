@@ -1,0 +1,48 @@
+name: Missing specification
+description: Help recover documentation or source material for a format.
+title: "[Missing specification] "
+labels:
+  - documentation
+body:
+  - type: input
+    id: format
+    attributes:
+      label: Format or extension
+      description: Name the format and include its usual extension when known.
+      placeholder: ".abc — Example Binary Container"
+    validations:
+      required: true
+  - type: input
+    id: catalog-page
+    attributes:
+      label: Wotsup.org page
+      description: Link the existing catalog page if one exists.
+      placeholder: "https://wotsup.org/extensions/a/abc/"
+  - type: textarea
+    id: material
+    attributes:
+      label: Material found
+      description: Describe the specification, technical notes, sample files, source code, or other evidence you found.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Provide direct links, publication details, archive locations, or provenance.
+    validations:
+      required: true
+  - type: textarea
+    id: rights
+    attributes:
+      label: License and redistribution
+      description: State whether files may be redistributed, linked only, or require further permission.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Verification
+      options:
+        - label: I checked that this material relates to the named format.
+          required: true
+        - label: I have not included confidential, personal, or unlawfully distributed material.
+          required: true

@@ -1,131 +1,110 @@
 # Wotsup.org
 
-[![PR Build Check](https://github.com/Matt-17/Wotsup.org/actions/workflows/pr-check.yml/badge.svg)](https://github.com/Matt-17/Wotsup.org/actions/workflows/pr-check.yml)
-[![Deploy to Production](https://github.com/Matt-17/Wotsup.org/actions/workflows/jekyll-build.yml/badge.svg?branch=master)](https://github.com/Matt-17/Wotsup.org/actions/workflows/jekyll-build.yml)
+<p align="center">
+  <a href="https://wotsup.org/">
+    <img src="src/assets/img/wotsup_560x320.png" width="420" alt="Wotsup.org">
+  </a>
+</p>
 
-**Live site:** [wotsup.org](https://wotsup.org/)
+<p align="center">
+  <strong>An open catalog of file format specifications, data structures, and implementation notes.</strong>
+</p>
 
-**Browse:** [extensions](https://wotsup.org/extensions/) | [how to use](https://wotsup.org/how-to/) | [contributing guide](https://wotsup.org/contributing/) | [GitHub actions](https://github.com/Matt-17/Wotsup.org/actions)
+<p align="center">
+  <a href="https://wotsup.org/">Browse the catalog</a> ·
+  <a href="https://wotsup.org/undocumented-formats/">Find undocumented formats</a> ·
+  <a href="https://wotsup.org/contributing/">Contribute</a>
+</p>
 
-Wotsup.org is a static catalog of file format specifications and related implementation references. The repository keeps the human-authored catalog in Markdown/YAML and generates the Jekyll pages, data files, and downloadable file tree used by the live site.
+<p align="center">
+  <a href="https://github.com/Matt-17/Wotsup.org/actions/workflows/pr-check.yml"><img src="https://github.com/Matt-17/Wotsup.org/actions/workflows/pr-check.yml/badge.svg" alt="PR Build Check"></a>
+  <a href="https://github.com/Matt-17/Wotsup.org/actions/workflows/jekyll-build.yml"><img src="https://github.com/Matt-17/Wotsup.org/actions/workflows/jekyll-build.yml/badge.svg?branch=master" alt="Deploy to Production"></a>
+</p>
 
-## Current Workflow Status
+Wotsup.org helps developers, digital archivists, reverse engineers, and curious people find the technical information needed to understand files. The catalog combines preserved reference material with modern, community-maintained format notes.
 
-- **PR Build Check** runs on pull requests to `master`. It validates catalog schema, audits the catalog, checks generated output integrity, builds the generated pages, runs `jekyll doctor`, builds the Jekyll site, and runs `bundler-audit`.
-- **Deploy to Production** runs on pushes to `master`. It validates the catalog, runs the production generator path with recent updates enabled, builds the Jekyll site, packages `src/_site/`, and deploys it with the configured GitHub Actions secrets.
-- Local development should mirror the PR workflow before opening a pull request. Use the commands in [Validation](#validation) when you touch catalog data, generator code, layouts, or dependencies.
+## What You Can Find
 
-## Repository Layout
+- File format specifications and implementation references
+- Data structures, signatures, compatibility notes, and decoding guidance
+- Historical formats that are difficult to research elsewhere
+- A public backlog of formats whose original documentation is still missing
 
-- `catalog/categories.yaml` is the canonical category list.
-- `catalog/<letter>/<extension>/index.md` contains each authored extension entry, using YAML front matter plus optional Markdown body content.
-- `catalog/<letter>/<extension>/*` may contain attached specification files referenced from front matter with `file:`.
-- `src/` contains the Jekyll site: layouts, includes, styles, static pages, and generated data.
-- `tools/` contains the PowerShell and file-based C# generators and validators.
-- Generated output is written to `src/_data/`, `src/extensions/`, `src/categories/`, `src/letters/`, `src/files/`, and `src/_site/`. Do not hand-edit generated files.
+The catalog is intentionally broader than a list of filename extensions. Entries may cover containers, protocols, hardware-related data, interchange formats, and other structured data.
 
-## Prerequisites
+## Help Recover Missing Knowledge
 
-- .NET SDK 10.x for the file-based C# tools used by CI.
-- Ruby 3.3 with Bundler for Jekyll.
-- PowerShell 7+ for the `tools/*.ps1` scripts.
+Some references known to the catalog have been lost or are no longer available. The [undocumented formats backlog](https://wotsup.org/undocumented-formats/) collects entries for which Wotsup currently has no preserved specification, active source, or detailed format notes.
 
-Install Ruby dependencies from the Jekyll project directory:
+You can help by:
 
-```powershell
-cd src
-bundle install
-cd ..
+- locating a specification or authoritative technical reference;
+- contributing original format notes or data structures;
+- providing legally redistributable reference files;
+- correcting an inaccurate entry or replacing a broken link.
+
+[Open a missing-specification issue](https://github.com/Matt-17/Wotsup.org/issues/new?template=missing-specification.yml) or submit a focused pull request.
+
+## Contributing
+
+Catalog content lives in `catalog/`. Each entry uses Markdown with YAML front matter:
+
+```text
+catalog/<letter>/<extension>/index.md
 ```
 
-## Quick Start
+Attached specifications belong beside the entry and are referenced with `file:`. External primary sources use `link:`. Include source, attribution, and license information whenever possible.
+
+See the [contribution guide](https://wotsup.org/contributing/) for the complete workflow.
+
+## Local Development
+
+Requirements:
+
+- .NET SDK 10.x
+- Ruby 3.3 with Bundler
+- PowerShell 7+
 
 ```powershell
-# From the repository root
 ./tools/build.ps1
 
 cd src
+bundle install
 bundle exec jekyll serve
 ```
 
-Open [http://localhost:4000](http://localhost:4000) after the server starts.
-
-## Catalog Workflow
-
-1. Edit or add an extension entry under `catalog/<letter>/<extension>/index.md`.
-2. Keep category names lowercase and matching `catalog/categories.yaml`, for example `archive`, `data-format`, or `gis-formats`.
-3. Put attached specs or reference files next to the entry and reference them from front matter with `file: filename.ext`.
-4. Run the generators with `./tools/build.ps1`.
-5. Validate the generated output before committing.
-
-Example entry shape:
-
-```markdown
----
-overview: ".zip is used for ZIP archives and ZIP-based container formats."
-extensions:
-  - name: "ZIP Archive"
-    description: "Compressed archive and package container format."
-    categories:
-      - archive
-    author: "PKWARE Inc."
-    link: "https://example.com/spec"
----
-
-## ZIP Archive
-
-Add concise notes, identification details, compatibility notes, and references here.
-```
-
-## Build Commands
-
-```powershell
-# Remove generated data, pages, copied files, and Jekyll output
-./tools/clean.ps1
-
-# Regenerate catalog data, pages, letters, and site stats
-./tools/build.ps1
-
-# Production-style generation, including slower recent-updates data
-./tools/build.ps1 -IncludeUpdates
-
-# Build the static Jekyll site
-cd src
-bundle exec jekyll build
-```
+The local site is available at `http://localhost:4000`.
 
 ## Validation
 
-Run these from the repository root unless noted:
+Run the repository checks from the project root:
 
 ```powershell
 dotnet tools/validate_yaml_schema.cs
 dotnet tools/validate_catalog.cs
 ./tools/build.ps1
 ./tools/check_generated_integrity.ps1
-git diff --check
-```
 
-For layout, dependency, or production-path changes, also run:
-
-```powershell
 cd src
 bundle exec jekyll doctor
 bundle exec jekyll build
-bundle exec bundler-audit check --update
 ```
 
-## Contributing
+Generated content under `src/_data/`, `src/extensions/`, `src/categories/`, `src/letters/`, and `src/files/` must not be edited manually.
 
-Keep pull requests focused. Separate catalog-data changes from template, generator, or deployment changes when practical. Include source and license notes for added specification files, and mention the validation commands you ran.
+## Project Structure
 
-Useful links:
+| Path | Purpose |
+| --- | --- |
+| `catalog/` | Authoritative catalog entries and preserved files |
+| `src/` | Jekyll layouts, pages, assets, and generated site data |
+| `tools/` | Catalog generators and validators |
+| `.github/` | Continuous integration and contribution templates |
 
-- [Live contribution guide](https://wotsup.org/contributing/)
-- [How to use Wotsup.org](https://wotsup.org/how-to/)
-- [GitHub issues](https://github.com/Matt-17/Wotsup.org/issues)
-- [Current GitHub Actions status](https://github.com/Matt-17/Wotsup.org/actions)
+## Project Background
 
-## Security Notes
+Wotsup.org includes material preserved from the former Wotsit.org collection, but it is maintained as an independent, evolving catalog. The goal is not only to preserve historical references, but also to improve entries, add current specifications, and make technical format knowledge easier to discover and contribute to.
 
-Do not commit deployment credentials, local secrets, or generated deployment packages. The production deploy uses GitHub Actions secrets and repository variables; local configuration should stay limited to .NET, Bundler, and generated build output.
+## License and Attribution
+
+Specifications and attached documents may have their own authors, copyright terms, and licenses. Preserve attribution and verify redistribution rights when contributing files. Repository code and catalog metadata follow the licensing information provided in this repository.
