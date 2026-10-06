@@ -796,9 +796,15 @@ table tr:nth-child(2n) {
   float: right;
   line-height: $base-line-height * $base-font-size * 2.25;
 
-  label[for="nav-trigger"],
-  #nav-trigger {
+  .nav-toggle {
     display: none;
+  }
+
+  .nav-toggle,
+  .dropdown-toggle {
+    background: none;
+    font: inherit;
+    cursor: pointer;
   }
 
   .page-link {
@@ -809,6 +815,13 @@ table tr:nth-child(2n) {
     border-radius: 10px;
     font-size: 0.95rem;
     border: 1px solid transparent;
+  }
+
+  .page-link:focus-visible,
+  .nav-toggle:focus-visible,
+  .dropdown-content a:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
   }
 
   .dropdown {
@@ -848,7 +861,9 @@ table tr:nth-child(2n) {
       }
     }
 
-    &:hover .dropdown-content {
+    &:hover .dropdown-content,
+    &:focus-within .dropdown-content,
+    .dropdown-toggle[aria-expanded="true"] + .dropdown-content {
       display: block;
     }
   }
@@ -873,7 +888,7 @@ table tr:nth-child(2n) {
     }
 
     &:hover .dropdown-content,
-    .dropdown-toggle:focus + .dropdown-content {
+    .dropdown-toggle[aria-expanded="true"] + .dropdown-content {
       display: block;
     }
   }
@@ -1469,9 +1484,40 @@ h2:target {
   text-decoration: none;
 }
 
-@media (max-width: 900px) {
-  .sidebar-extensions {
-    display: none;
+// Small screens: the sidebar sits above the content as a horizontally scrolling row of category chips
+@media (max-width: 960px) {
+  .layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .site-sidebar {
+    position: static;
+    padding: 0.75rem;
+  }
+
+  .sidebar-extensions .extensions-filters {
+    position: static;
+  }
+
+  .sidebar-extensions .filters-category ul {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-extensions .filters-category li {
+    flex: 0 0 auto;
+    margin: 0;
+    scroll-snap-align: start;
+  }
+
+  .sidebar-extensions .filters-category a {
+    margin-bottom: 0;
+    white-space: nowrap;
   }
 }
 
@@ -2693,20 +2739,16 @@ h2:target {
       z-index: 1001;
     }
 
-    .nav-trigger {
-      display: none;
-
-      &:checked ~ .trigger {
-        display: block;
-      }
-    }
-
-    label[for="nav-trigger"] {
+    .nav-toggle {
       display: block;
-      cursor: pointer;
       padding: 0.5rem;
+      border: none;
       z-index: 1002;
       position: relative;
+
+      &[aria-expanded="true"] ~ .trigger {
+        display: block;
+      }
     }
 
     .menu-icon {
@@ -2741,13 +2783,14 @@ h2:target {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        width: 100%;
         padding: 0.75rem 1rem;
         cursor: pointer;
         line-height: 1.5;
         color: var(--text-color);
 
         &::after {
-          content: "â–¼";
+          content: "\25BC";
           font-size: 0.6em;
           opacity: 0.7;
           margin-left: 0.5rem;
@@ -2783,7 +2826,8 @@ h2:target {
       }
 
       &:hover .dropdown-content,
-      &:focus-within .dropdown-content {
+      &:focus-within .dropdown-content,
+      .dropdown-toggle[aria-expanded="true"] + .dropdown-content {
         display: block;
       }
     }

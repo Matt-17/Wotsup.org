@@ -1,30 +1,30 @@
-<header class="site-header" role="banner">
+<header class="site-header">
 
   <div class="wrapper">
     {%- assign navigation = site.navigation -%}
     <a class="sitelogo" rel="author" href="{{ "/" | relative_url }}" title="{{ site.title | escape }}">
       <img src="{{ '/assets/img/wotsup_105x60.png' | relative_url }}" alt="Wotsup" />
     </a>
-    <nav class="site-nav">
-      <input type="checkbox" id="nav-trigger" class="nav-trigger" />
-      <label for="nav-trigger">
-        <span class="menu-icon">
+    <nav class="site-nav" aria-label="Main">
+      <button type="button" class="nav-toggle" aria-expanded="false" aria-controls="site-nav-menu">
+        <span class="menu-icon" aria-hidden="true">
           <svg viewBox="0 0 18 15" width="18px" height="15px">
             <path
               d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z" />
           </svg>
         </span>
-      </label>
+        <span class="sr-only">Menu</span>
+      </button>
 
-      <div class="trigger">
+      <div class="trigger" id="site-nav-menu">
         {%- if navigation -%}
         {%- for item in navigation -%}
         {%- if item.dropdown -%}
         <div class="dropdown">
-          <span class="page-link dropdown-toggle">{{ item.title | escape }}</span>
-          <div class="dropdown-content" role="menu" aria-hidden="true">
+          <button type="button" class="page-link dropdown-toggle" aria-expanded="false" aria-controls="nav-dropdown-{{ forloop.index }}">{{ item.title | escape }}</button>
+          <div class="dropdown-content" id="nav-dropdown-{{ forloop.index }}">
             {%- for subitem in item.dropdown -%}
-            <a role="menuitem" href="{{ subitem.url | relative_url }}">{{ subitem.title | escape }}</a>
+            <a href="{{ subitem.url | relative_url }}">{{ subitem.title | escape }}</a>
             {%- endfor -%}
           </div>
         </div>
@@ -37,3 +37,30 @@
     </nav>
   </div>
 </header>
+<script>
+  (function () {
+    const nav = document.querySelector('.site-nav');
+    if (!nav) return;
+    const toggles = nav.querySelectorAll('.nav-toggle, .dropdown-toggle');
+    function closeDropdowns(except) {
+      nav.querySelectorAll('.dropdown-toggle[aria-expanded="true"]').forEach(function (b) {
+        if (b !== except) b.setAttribute('aria-expanded', 'false');
+      });
+    }
+    toggles.forEach(function (button) {
+      button.addEventListener('click', function () {
+        const open = button.getAttribute('aria-expanded') === 'true';
+        if (button.classList.contains('dropdown-toggle')) closeDropdowns(button);
+        button.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+    });
+    document.addEventListener('click', function (event) {
+      if (!nav.contains(event.target)) closeDropdowns();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape') return;
+      const open = nav.querySelector('.dropdown-toggle[aria-expanded="true"]');
+      if (open) { closeDropdowns(); open.focus(); }
+    });
+  })();
+</script>
