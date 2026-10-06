@@ -64,7 +64,7 @@ hero_cta_secondary: /how-to/
   <section class="landing-section feature-grid">
     <article class="feature-card">
       <h3>Explore the collection</h3>
-      <p>Browse by format and category to find specs and decoding notes. For keyword searches, try a search engine with <code>site:wotsup.org</code>.</p>
+      <p>Search by extension or format name from any page (press <kbd>/</kbd>), or browse by category to find specs and decoding notes.</p>
       <a href="{{ '/extensions/' | relative_url }}">Browse all formats &rarr;</a>
     </article>
     <article class="feature-card">

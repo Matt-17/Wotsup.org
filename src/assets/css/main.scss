@@ -860,6 +860,139 @@ table tr:nth-child(2n) {
   margin-left: auto;
 }
 
+.site-search {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 420px;
+  margin: 0 1rem;
+}
+
+.site-search__input {
+  width: 100%;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  background: var(--light-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+
+  &::placeholder {
+    color: var(--text-color-secondary);
+  }
+
+  &:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+}
+
+.site-search__hint {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 0.4rem;
+  font-family: $code-font-family;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-color-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.site-search__input:focus ~ .site-search__hint {
+  display: none;
+}
+
+.site-search__results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: min(70vh, 480px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  line-height: 1.4;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  z-index: 1003;
+
+  li {
+    margin: 0;
+  }
+
+  a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    color: var(--text-color);
+    text-decoration: none;
+  }
+
+  code {
+    flex: 0 0 auto;
+    color: var(--primary-color);
+    background: none;
+    padding: 0;
+  }
+
+  small {
+    flex: 0 0 auto;
+    color: var(--text-color-secondary);
+  }
+
+  [aria-selected="true"] a,
+  a:hover {
+    background: var(--light-bg);
+    color: #fff;
+  }
+}
+
+.site-search__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-search__empty {
+  padding: 0.5rem 0.6rem;
+  color: var(--text-color-secondary);
+}
+
+@media (max-width: $bp-md) {
+  // Static so the results panel spans the whole (fixed) header instead of the narrow input
+  .site-search {
+    position: static;
+    margin: 0 0.5rem;
+  }
+
+  .site-search__results {
+    top: 100%;
+    left: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .site-search__hint {
+    display: none;
+  }
+
+  .site-search__input {
+    padding-right: 0.75rem;
+  }
+}
+
 .site-footer .wrapper {
   display: flex;
   flex-wrap: wrap;

@@ -1,0 +1,9 @@
+---
+layout: null
+permalink: /search.json
+sitemap: false
+---
+[{%- for item in site.data.catalog_flat -%}
+{%- assign url = '/extensions/' | append: item.letter | append: '/' | append: item.slug | append: '/' | downcase | relative_url -%}
+{"e":{{ item.ext | downcase | jsonify }},"u":{{ url | jsonify }},"n":{{ item.name | default: item.description | strip | jsonify }},"d":{{ item.description | strip | jsonify }}}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}]

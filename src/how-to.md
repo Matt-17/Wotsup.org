@@ -4,13 +4,11 @@ title: How to Use
 ---
 ## How to Use Wotsup.org
 
-Note: the on-site search box has been removed. Use the alternatives below to find format information.
-
 Finding information
 
+- Use the search box in the header (press <kbd>/</kbd> to jump to it). Type an extension such as `.heic` or part of a format name such as `Photoshop`, then pick a result with the arrow keys and Enter.
 - Browse by category using the site navigation to the left or the header menu. Categories group similar formats (archive, graphics, audio, etc.).
-- Use external search engines with a site filter, for example: `site:wotsit.org zip format` or `site:wotsup.org "ZIP"`.
-- If you know a file extension, try browsing the relevant category or lookup pages (e.g., Archive / Compression formats).
+- For full-text searches inside format notes, use an external search engine with a site filter, for example `site:wotsup.org "ZIP"`.
 
 Format pages include a short description, author/attribution (when known), and links to available specification documents or downloads.
 

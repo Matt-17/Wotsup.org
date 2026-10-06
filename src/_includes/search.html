@@ -1,0 +1,161 @@
+<form class="site-search" role="search" action="{{ '/extensions/' | relative_url }}" data-index="{{ '/search.json' | relative_url }}">
+  <label class="sr-only" for="site-search-input">Search file formats</label>
+  <input id="site-search-input" class="site-search__input" type="search" name="q" placeholder="Search formats, e.g. .heic or Photoshop"
+    autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="site-search-results"
+    aria-autocomplete="list">
+  <kbd class="site-search__hint" aria-hidden="true">/</kbd>
+  <ul class="site-search__results" id="site-search-results" role="listbox" aria-label="Matching formats" hidden></ul>
+  <p class="sr-only" aria-live="polite" id="site-search-status"></p>
+</form>
+<script>
+  (function () {
+    const form = document.querySelector('.site-search');
+    if (!form) return;
+    const input = form.querySelector('.site-search__input');
+    const list = form.querySelector('.site-search__results');
+    const status = form.querySelector('#site-search-status');
+    const MAX_RESULTS = 12;
+    let formats = null, loading = null, results = [], active = -1;
+
+    // One entry per extension; an extension can have several meanings in the catalog
+    function load() {
+      if (!loading) {
+        loading = fetch(form.dataset.index)
+          .then(function (response) { return response.json(); })
+          .then(function (items) {
+            const byExt = new Map();
+            items.forEach(function (item) {
+              let format = byExt.get(item.e);
+              if (!format) {
+                format = { ext: item.e, url: item.u, names: [], entries: [] };
+                byExt.set(item.e, format);
+              }
+              if (item.n && format.names.indexOf(item.n) < 0) format.names.push(item.n);
+              format.entries.push((item.n + ' ' + (item.d || '')).toLowerCase());
+            });
+            formats = Array.from(byExt.values());
+            formats.forEach(function (f) {
+              f.text = f.entries.join(' ');
+              f.compact = f.text.replace(/\s+/g, '');
+            });
+          })
+          .catch(function () { loading = null; });
+      }
+      return loading;
+    }
+
+    function score(format, query, words) {
+      const ext = format.ext;
+      if (ext === query) return 100;
+      if (ext.startsWith(query)) return 80 - (ext.length - query.length);
+      if (!words.every(function (w) { return format.text.indexOf(w) >= 0 || ext.indexOf(w) >= 0; })) return 0;
+      let points = 20;
+      // Whole words beat substrings, "open document" also finds "OpenDocument"
+      if (words.every(function (w) { return new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(format.text); })) points += 15;
+      if (words.length > 1 && format.compact.indexOf(words.join('')) >= 0) points += 20;
+      if (ext.indexOf(query) >= 0) points += 10;
+      if (words.indexOf(ext) >= 0) points += 30;
+      // Formats with several matching references are usually the one people mean
+      const matching = format.entries.filter(function (e) { return words.every(function (w) { return e.indexOf(w) >= 0; }); }).length;
+      return points + Math.min(matching, 5) * 2;
+    }
+
+    function search(raw) {
+      const query = raw.trim().toLowerCase().replace(/^\*?\./, '');
+      if (!query || !formats) return [];
+      const words = query.split(/\s+/).filter(Boolean);
+      return formats
+        .map(function (f) { return { format: f, score: score(f, query, words) }; })
+        .filter(function (r) { return r.score > 0; })
+        .sort(function (a, b) { return b.score - a.score || a.format.ext.localeCompare(b.format.ext); })
+        .slice(0, MAX_RESULTS)
+        .map(function (r) { return r.format; });
+    }
+
+    function render() {
+      list.innerHTML = '';
+      results.forEach(function (format, i) {
+        const li = document.createElement('li');
+        li.id = 'site-search-option-' + i;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', i === active ? 'true' : 'false');
+        const a = document.createElement('a');
+        a.href = format.url;
+        a.tabIndex = -1;
+        const ext = document.createElement('code');
+        ext.textContent = '.' + format.ext;
+        const name = document.createElement('span');
+        name.className = 'site-search__name';
+        name.textContent = format.names[0] || '';
+        a.appendChild(ext);
+        a.appendChild(name);
+        if (format.names.length > 1) {
+          const more = document.createElement('small');
+          more.textContent = '+' + (format.names.length - 1) + ' more';
+          a.appendChild(more);
+        }
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+      const hasQuery = input.value.trim() !== '';
+      if (hasQuery && formats && !results.length) {
+        const li = document.createElement('li');
+        li.className = 'site-search__empty';
+        li.textContent = 'No matching format. Browse all formats or check the undocumented list.';
+        list.appendChild(li);
+      }
+      const open = hasQuery && formats !== null;
+      list.hidden = !open;
+      input.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (active >= 0) input.setAttribute('aria-activedescendant', 'site-search-option-' + active);
+      else input.removeAttribute('aria-activedescendant');
+      status.textContent = hasQuery && formats ? results.length + ' formats found' : '';
+    }
+
+    function update() {
+      load().then(function () {
+        results = search(input.value);
+        active = results.length ? 0 : -1;
+        render();
+      });
+    }
+
+    function close() {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+    }
+
+    input.addEventListener('focus', function () { load(); if (input.value.trim()) update(); });
+    input.addEventListener('input', update);
+    input.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!results.length) return;
+        event.preventDefault();
+        active = (active + (event.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
+        render();
+        const option = document.getElementById('site-search-option-' + active);
+        if (option) option.scrollIntoView({ block: 'nearest' });
+      } else if (event.key === 'Escape') {
+        if (!list.hidden) { event.preventDefault(); close(); }
+        else input.blur();
+      }
+    });
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const target = results[active] || results[0];
+      if (target) window.location.href = target.url;
+    });
+    document.addEventListener('click', function (event) {
+      if (!form.contains(event.target)) close();
+    });
+    // "/" focuses the search, like on GitHub and MDN
+    document.addEventListener('keydown', function (event) {
+      if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) return;
+      const tag = (document.activeElement && document.activeElement.tagName) || '';
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || document.activeElement.isContentEditable) return;
+      event.preventDefault();
+      input.focus();
+    });
+  })();
+</script>
