@@ -44,7 +44,7 @@ Parameters (assign before including):
             {% assign letter_path = item.letter | downcase %}
             <td class="extension" {% if group_size> 1 %}rowspan="{{ group_size }}"{% endif %}>
                 <a class="ext-link"
-                    href="/extensions/{{ letter_path }}/{{ item.slug }}/"><code>{{ item.ext }}</code></a>
+                    href="{{ '/extensions/' | append: letter_path | append: '/' | append: item.slug | append: '/' | relative_url }}"><code>{{ item.ext }}</code></a>
             </td>
             {% assign prev_ext = item.ext %}
             {% endif %}
@@ -68,12 +68,12 @@ Parameters (assign before including):
                 {% assign alt_slug = item.alternative_to %}
                 {% assign alt_target = items | where: "slug", alt_slug | first %}
                 {% if alt_target %}
-                <a class="action-btn alt" href="/extensions/{{ alt_target.letter | downcase }}/{{ alt_target.slug }}/">
+                <a class="action-btn alt" href="{{ '/extensions/' | append: alt_target.letter | downcase | append: '/' | append: alt_target.slug | append: '/' | relative_url }}">
                     <span class="icon" aria-hidden="true">🔁</span>
                     <span class="label">{{ alt_target.ext }}</span>
                 </a>
                 {% else %}
-                <a class="action-btn alt" href="/extensions/{{ item.letter | downcase }}/{{ alt_slug }}/">
+                <a class="action-btn alt" href="{{ '/extensions/' | append: item.letter | downcase | append: '/' | append: alt_slug | append: '/' | relative_url }}">
                     <span class="icon" aria-hidden="true">🔁</span>
                     <span class="label">.{{ alt_slug }}</span>
                 </a>

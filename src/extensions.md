@@ -22,7 +22,7 @@ permalink: /extensions/
         {% for category in all_categories %}
             {% assign count = site.data.catalog_flat | where_exp: "item", "item.category == category.slug or item.categories contains category.slug" | size %}
             
-            <a class="category-card" href="/categories/{{ category.slug }}">
+            <a class="category-card" href="{{ '/categories/' | append: category.slug | append: '/' | relative_url }}">
                 <div class="category-content">
                     <h2>{{ category.name }}</h2>
                     <p>{{ category.description }}</p>

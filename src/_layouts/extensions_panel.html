@@ -37,7 +37,7 @@
                                 {% for letter in letters %}
                                 {% assign lslug = letter | downcase %}
                                 <li>
-                                    <a href="/extensions/{{ lslug }}/"
+                                    <a href="{{ '/extensions/' | append: lslug | append: '/' | relative_url }}"
                                         class="{% if lslug == current_letter %}active{% endif %}" {% if
                                         lslug==current_letter %}aria-current="true" {% endif %}>{{ letter | upcase
                                         }}</a>

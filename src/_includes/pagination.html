@@ -9,7 +9,7 @@ Parameters:
 
 {% assign current = include.current | plus: 0 %}
 {% assign total_pages = include.total_pages | plus: 0 %}
-{% assign base_url = include.base_url %}
+{% assign base_url = include.base_url | relative_url %}
 {% assign id_suffix = include.id_suffix | default: '' %}
 {% assign per_page = include.per_page | default: 25 %}
 {% assign total_items = include.total_items | plus: 0 %}
@@ -109,7 +109,7 @@ Parameters:
 {% if paginator and paginator.total_pages and paginator.total_pages > 1 and __rendered_pagination != 'true' %}
 {% comment %} Extract base path from page permalink or paginator first_page_path {% endcomment %}
 {% assign base_path = page.permalink | default: paginator.first_page_path | default: "/extensions/" %}
-{% assign base_path = base_path | remove: "index.html" %}
+{% assign base_path = base_path | remove: "index.html" | relative_url %}
 
 <nav class="pagination" aria-label="Pagination">
     <ul class="pagination-list">

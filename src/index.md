@@ -17,8 +17,8 @@ hero_cta_secondary: /how-to/
         legacy data accessible.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/contributing/">Start contributing</a>
-        <a class="btn" href="/how-to/">How to use</a>
+        <a class="btn btn-primary" href="{{ '/contributing' | relative_url }}">Start contributing</a>
+        <a class="btn" href="{{ '/how-to' | relative_url }}">How to use</a>
       </div>
       <ul class="hero-pills">
         <li>{{ site.data.site_stats.file_formats_total }}+ file formats</li>
@@ -30,9 +30,9 @@ hero_cta_secondary: /how-to/
       <img class="landing-hero__image" src="{{ '/assets/img/wotsup_560x320.png' | relative_url }}" alt="Wotsup" title="{{ site.title | escape }}" />
       <h3>Quick links</h3>
       <ul>
-        <li><a href="/how-to/">How to use</a></li>
-        <li><a href="/faq/">FAQ</a></li>
-        <li><a href="/about/">About</a></li>
+        <li><a href="{{ '/how-to' | relative_url }}">How to use</a></li>
+        <li><a href="{{ '/faq' | relative_url }}">FAQ</a></li>
+        <li><a href="{{ '/about' | relative_url }}">About</a></li>
       </ul>
     </div>
   </section>
@@ -65,17 +65,17 @@ hero_cta_secondary: /how-to/
     <article class="feature-card">
       <h3>Explore the collection</h3>
       <p>Browse by format and category to find specs and decoding notes. For keyword searches, try a search engine with <code>site:wotsup.org</code>.</p>
-      <a href="/site-structure/">Explore the information architecture &rarr;</a>
+      <a href="{{ '/extensions/' | relative_url }}">Browse all formats &rarr;</a>
     </article>
     <article class="feature-card">
       <h3>Engineering ready</h3>
       <p>Entries focus on structures, fields, and practical tips for building parsers.</p>
-      <a href="/how-to/">Developer guidance &rarr;</a>
+      <a href="{{ '/how-to' | relative_url }}">Developer guidance &rarr;</a>
     </article>
     <article class="feature-card">
       <h3>Community powered</h3>
       <p>Submit corrections or new specs via GitHub. Every contribution is reviewed.</p>
-      <a href="/contributing/">Contributing guide &rarr;</a>
+      <a href="{{ '/contributing' | relative_url }}">Contributing guide &rarr;</a>
     </article>
   </section>
 
@@ -96,9 +96,9 @@ hero_cta_secondary: /how-to/
       <h3>Start with the quick guides.</h3>
       <p>Learn how to navigate the archive and find the format information you need.</p>
       <div class="link-grid">
-        <a href="/how-to/">How to use Wotsup.org</a>
-        <a href="/faq/">Frequently asked questions</a>
-        <a href="/contact/">Contact + support</a>
+        <a href="{{ '/how-to' | relative_url }}">How to use Wotsup.org</a>
+        <a href="{{ '/faq' | relative_url }}">Frequently asked questions</a>
+        <a href="{{ '/feedback' | relative_url }}">Contact + feedback</a>
       </div>
     </article>
   </section>
@@ -145,13 +145,13 @@ hero_cta_secondary: /how-to/
     </div>
     <div class="cta-actions">
       <a class="btn btn-primary" href="https://github.com/Matt-17/Wotsup.org">View the repository</a>
-      <a class="btn" href="/contributing/">Contribution guide</a>
+      <a class="btn" href="{{ '/contributing' | relative_url }}">Contribution guide</a>
     </div>
   </section>
 
   <section class="landing-section tribute">
     <p>Built on the foundation of Wotsit.org, originally created by Paul Oliver and contributors worldwide.
-      Thanks to their pioneering work in documenting file formats. <a href="/about/">Read more about Wotsup.org &rarr;</a>
+      Thanks to their pioneering work in documenting file formats. <a href="{{ '/about' | relative_url }}">Read more about Wotsup.org &rarr;</a>
     </p>
   </section>
 </div>
