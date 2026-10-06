@@ -2979,3 +2979,66 @@ nav.pagination {
     font-size: 0.92rem;
   }
 }
+
+.backlog-toolbar {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto;
+  gap: 0.5rem 1rem;
+  align-items: end;
+  margin: 2rem 0 1rem;
+}
+
+.backlog-toolbar label {
+  grid-column: 1 / -1;
+  font-weight: 700;
+}
+
+.backlog-toolbar input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--light-bg);
+  color: var(--text-color);
+}
+
+.backlog-toolbar input:focus {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+#backlog-count {
+  padding-bottom: 0.75rem;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+}
+
+.backlog-table-wrap {
+  overflow-x: auto;
+}
+
+.undocumented-table small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-color-secondary);
+}
+
+.backlog-category {
+  display: inline-block;
+  margin: 0.15rem 0.25rem 0.15rem 0;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .backlog-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  #backlog-count {
+    padding-bottom: 0;
+  }
+}

@@ -11,6 +11,11 @@
                             All formats
                         </a>
                     </li>
+                    <li class="mb">
+                        <a href="{{ '/undocumented-formats/' | relative_url }}" {% if page.url == '/undocumented-formats/' %}class="active" aria-current="page"{% endif %}>
+                            Undocumented formats
+                        </a>
+                    </li>
                     {% for cat in site.data.categories.categories | sort: 'name' %}
                     {% assign link_url = '/categories/' | append: cat.slug | append: '/' %}
                     <li>

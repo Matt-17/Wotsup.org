@@ -6,7 +6,8 @@ description: >-
   implementation guides.
 baseurl: "" 
 url: "https://wotsup.org" 
-github_username: Matt-17/Wotsup
+github_username: Matt-17
+repository: Matt-17/Wotsup.org
 
 markdown: kramdown
 
@@ -22,6 +23,9 @@ navigation:
 
   - title: Extensions
     url: /extensions/
+
+  - title: Undocumented
+    url: /undocumented-formats/
 
   - title: FAQ
     url: /faq
