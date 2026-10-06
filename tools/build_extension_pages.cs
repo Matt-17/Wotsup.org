@@ -86,8 +86,18 @@ foreach (var letterDir in Directory.GetDirectories(catalogDir).OrderBy(d => d))
             var fmObj = deserializer.Deserialize<Dictionary<string, object?>>(frontmatterText!) ?? new();
             if (!fmObj.ContainsKey("extension")) fmObj["extension"] = ext;
             if (!fmObj.ContainsKey("letter")) fmObj["letter"] = letter; // convenience
-            if (fmObj.TryGetValue("extensions", out var extensionsValue))
+            fmObj.TryGetValue("extensions", out var extensionsValue);
+            if (extensionsValue != null)
                 EnrichResourceLinks(extensionsValue, letter, ext, extDir);
+            // Page title and meta description for <title>, search results and link previews (jekyll-seo-tag)
+            var primary = (extensionsValue as IEnumerable<object>)?.FirstOrDefault();
+            var primaryName = GetEntryValue(primary, "name");
+            if (!fmObj.ContainsKey("title"))
+                fmObj["title"] = primaryName != null ? $".{ext} – {primaryName}" : $".{ext} file extension";
+            if (!fmObj.ContainsKey("description"))
+                fmObj["description"] = fmObj.TryGetValue("overview", out var overview) && !string.IsNullOrWhiteSpace(overview?.ToString())
+                    ? overview!.ToString()!.Trim()
+                    : $"What .{ext} files are: {GetEntryValue(primary, "description") ?? primaryName ?? "file format"}, with specifications and references on Wotsup.org.";
             // Re-serialize sanitized frontmatter
             var serializer = new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
             frontmatterText = serializer.Serialize(fmObj).TrimEnd();
@@ -128,6 +138,18 @@ foreach (var letterDir in Directory.GetDirectories(catalogDir).OrderBy(d => d))
 
 Console.WriteLine($"Generated/updated extension pages. Created: {created}, Updated: {updated}, Skipped: {skipped}");
 return 0;
+
+string? GetEntryValue(object? entry, string key)
+{
+    object? value = entry switch
+    {
+        IDictionary<object, object> objectDict => objectDict.FirstOrDefault(kv => string.Equals(kv.Key?.ToString(), key, StringComparison.OrdinalIgnoreCase)).Value,
+        IDictionary<string, object?> stringDict => stringDict.TryGetValue(key, out var v) ? v : null,
+        _ => null
+    };
+    var text = value?.ToString()?.Trim();
+    return string.IsNullOrWhiteSpace(text) ? null : text;
+}
 
 void EnrichResourceLinks(object? value, string letter, string ext, string sourceDir)
 {
