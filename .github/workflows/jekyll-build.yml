@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -36,7 +36,7 @@ jobs:
         run: bundle install
 
       - name: Cache setup
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             src/vendor/bundle
@@ -49,12 +49,12 @@ jobs:
     needs: setup
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -70,7 +70,7 @@ jobs:
           ./tools/build.ps1 --IncludeUpdates
 
       - name: Upload generated data
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: generated-data
           path: |
@@ -86,7 +86,7 @@ jobs:
     needs: generate
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -100,7 +100,7 @@ jobs:
         run: bundle install
 
       - name: Download generated data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: generated-data
           path: src/
@@ -112,7 +112,7 @@ jobs:
         run: bundle exec jekyll build
 
       - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: site-build
           path: src/_site/
@@ -129,7 +129,7 @@ jobs:
       REMOTE_WEBROOT: ${{ vars.REMOTE_WEBROOT }}
     steps:
       - name: Download site artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: site-build
           path: _site/
