@@ -125,7 +125,7 @@ jobs:
     needs: build
     env:
       SSHPASS: ${{ secrets.STRATO_SSH_PASS }}
-      SSH_TARGET: ${{ secrets.STRATO_SSH_USER }}@${{ secrets.STRATO_SSH_HOST }}
+      SSH_TARGET: ${{ vars.STRATO_SSH_USER }}@${{ vars.STRATO_SSH_HOST }}
       REMOTE_WEBROOT: ${{ vars.REMOTE_WEBROOT }}
     steps:
       - name: Download site artifact
@@ -138,7 +138,7 @@ jobs:
         run: |
           sudo apt-get install -y -qq sshpass
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.STRATO_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H "${{ vars.STRATO_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Upload web root
         run: |
