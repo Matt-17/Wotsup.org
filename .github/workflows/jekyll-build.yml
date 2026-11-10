@@ -123,178 +123,30 @@ jobs:
     name: Deploy to Server
     runs-on: ubuntu-latest
     needs: build
+    env:
+      SSHPASS: ${{ secrets.STRATO_SSH_PASS }}
+      SSH_TARGET: ${{ secrets.STRATO_SSH_USER }}@${{ secrets.STRATO_SSH_HOST }}
+      REMOTE_WEBROOT: ${{ vars.REMOTE_WEBROOT }}
     steps:
-      - name: Checkout deployment scripts
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            .github/deploy
-          sparse-checkout-cone-mode: false
-
       - name: Download site artifact
         uses: actions/download-artifact@v4
         with:
           name: site-build
           path: _site/
 
-      - name: Generate deployment key
-        id: deploy_key
+      - name: Prepare SSH
         run: |
-          set -euo pipefail
-          # Generate a one-time deploy key and immediately mask it in logs
-          DEPLOY_KEY=$(openssl rand -hex 32)
-          echo "::add-mask::${DEPLOY_KEY}"
-          # Export as step output without printing the key elsewhere
-          echo "deploy_key=${DEPLOY_KEY}" >> "$GITHUB_OUTPUT"
-          # Write key file for upload
-          printf '%s' "${DEPLOY_KEY}" > .deploy.key
-          # Do not echo the key value to logs
-          echo "🔑 Generated unique deployment key (masked)"
+          sudo apt-get install -y -qq sshpass
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.STRATO_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Create deployment package
+      - name: Upload web root
         run: |
-          echo "📦 Creating site.zip from _site directory..."
-          cd _site
-          zip -r -q ../site.zip .
-          cd ..
-          
-          ZIP_SIZE=$(stat -f%z site.zip 2>/dev/null || stat -c%s site.zip)
-          ZIP_SIZE_MB=$(echo "scale=2; $ZIP_SIZE / 1024 / 1024" | bc)
-          echo "✅ Created site.zip (${ZIP_SIZE_MB} MB)"
-          
-          FILE_COUNT=$(unzip -l site.zip | tail -1 | awk '{print $2}')
-          echo "📊 Package contains ${FILE_COUNT} files"
+          test -n "$REMOTE_WEBROOT"
+          sshpass -e rsync -az --delete --checksum _site/ "$SSH_TARGET:$REMOTE_WEBROOT/"
 
-      - name: Upload deployment package via SFTP
-        env:
-          SFTP_HOST: ${{ secrets.FTP_SERVER }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: ${{ secrets.FTP_PORT }}
-          SFTP_DIR: ${{ secrets.FTP_SERVER_DIR }}
+      - name: Smoke test
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y lftp
-          
-          PORT="${SFTP_PORT:-22}"
-          DEPLOY_DIR="${SFTP_DIR}/.deploy"
-          
-          echo "=========================================="
-          echo "📤 Uploading deployment package"
-          echo "=========================================="
-          echo "Destination: ${DEPLOY_DIR}"
-          echo ""
-          
-          lftp -u "$SFTP_USER","$SFTP_PASS" -p "$PORT" sftp://"$SFTP_HOST" <<EOF
-          set sftp:auto-confirm yes
-          set ssl:verify-certificate no
-          set net:timeout 60
-          set net:max-retries 3
-          mkdir -p "$DEPLOY_DIR"
-          cd "$DEPLOY_DIR"
-          put site.zip
-          put .deploy.key
-          put .github/deploy/deploy.php
-          chmod 644 site.zip
-          chmod 644 .deploy.key
-          chmod 644 deploy.php
-          bye
-          EOF
-          
-          echo ""
-          echo "✅ Upload complete!"
-
-      - name: Trigger deployment via HTTP
-        env:
-          WEB_SERVER: ${{ vars.WEB_SERVER }}
-          DEPLOY_KEY: ${{ steps.deploy_key.outputs.deploy_key }}
-        run: |
-          echo "=========================================="
-          echo "🚀 Triggering deployment"
-          echo "=========================================="
-          # Build the URL but do not print it (key is masked)
-          DEPLOY_URL="${WEB_SERVER}/.deploy/deploy.php?key=${DEPLOY_KEY}"
-          echo "Calling deployment script... (URL is masked)"
-          echo ""
-          HTTP_CODE=$(curl -s -w "%{http_code}" -o response.json --max-time 300 "$DEPLOY_URL")
-          
-          echo "HTTP Status: ${HTTP_CODE}"
-          echo ""
-          
-          if [ ! -s response.json ]; then
-            echo "❌ Empty response from deployment script!"
-            echo "Possible causes:"
-            echo "  - Script not found (404)"
-            echo "  - PHP fatal error"
-            echo "  - Server timeout"
-            exit 1
-          fi
-          
-          echo "Response:"
-          cat response.json | jq '.' 2>/dev/null || cat response.json
-          echo ""
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "❌ Deployment failed with HTTP ${HTTP_CODE}"
-            exit 1
-          fi
-          
-          SUCCESS=$(cat response.json | jq -r '.success')
-          
-          if [ "$SUCCESS" = "true" ]; then
-            FILES_DEPLOYED=$(cat response.json | jq -r '.files_deployed')
-            FILES_DELETED=$(cat response.json | jq -r '.files_deleted')
-            DURATION=$(cat response.json | jq -r '.duration_seconds')
-            
-            echo "=========================================="
-            echo "✅ Deployment successful!"
-            echo "=========================================="
-            echo "📤 Files deployed: ${FILES_DEPLOYED}"
-            echo "🗑️  Files deleted: ${FILES_DELETED}"
-            echo "⏱️  Duration: ${DURATION}s"
-          else
-            ERRORS=$(cat response.json | jq -r '.errors | join(", ")')
-            echo "❌ Deployment failed!"
-            echo "Errors: ${ERRORS}"
-            exit 1
-          fi
-
-      - name: Cleanup deployment artifacts
-        if: always()
-        env:
-          SFTP_HOST: ${{ secrets.FTP_SERVER }}
-          SFTP_USER: ${{ secrets.FTP_USERNAME }}
-          SFTP_PASS: ${{ secrets.FTP_PASSWORD }}
-          SFTP_PORT: ${{ secrets.FTP_PORT }}
-          SFTP_DIR: ${{ secrets.FTP_SERVER_DIR }}
-        run: |
-          sudo apt-get install -y sshpass
-          
-          PORT="${SFTP_PORT:-22}"
-          DEPLOY_DIR="${SFTP_DIR}/.deploy"
-          
-          echo "🧹 Cleaning up deployment artifacts..."
-          
-          # Try removing the configured .deploy and also the user's home .deploy as a fallback
-          sudo apt-get update -y
-          sudo apt-get install -y lftp
-
-          PORT="${SFTP_PORT:-22}"
-          DEPLOY_DIR="${SFTP_DIR}/.deploy"
-
-          echo "🧹 Cleaning up deployment artifacts..."
-
-          # Use lftp to remove the deploy directory recursively if present
-          lftp -u "$SFTP_USER","$SFTP_PASS" -p "$PORT" sftp://"$SFTP_HOST" <<EOF || true
-          set sftp:auto-confirm yes
-          set ssl:verify-certificate no
-          set net:timeout 60
-          set net:max-retries 3
-          rm -r "$DEPLOY_DIR" || true
-          rm -r "$HOME/.deploy" || true
-          bye
-          EOF
-          
-          echo "✅ Cleanup complete"
-          
-          echo "✅ Cleanup complete"
+          sleep 5
+          curl -fsS -o /dev/null "${{ vars.WEB_SERVER }}/"
+          curl -fsS -o /dev/null "${{ vars.WEB_SERVER }}/search.json"
